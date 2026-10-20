@@ -65,6 +65,6 @@ A small model on a laptop is best at focused, repeatable work where the answer l
 
 \*Runs on modest hardware, for example an integrated GPU with 12 execution units (EUs), a 200 MHz base clock boosting to 650–700 MHz, shared system RAM (no dedicated VRAM) and a 14 nm process. Training may require better specs, but you can do it on something like a MacBook Pro.
 
-## Get started
+## Launch an agent
 
-Heura Studios is open. [Get started](https://app.heurastudios.com/signup) with one job. And tell us what you'd want your assistant to do: [email the founders](mailto:ryantian@ostravanne.com,leoli@ostravanne.com,ethanwang@ostravanne.com). We read every email.
+Heura Studios is open. [Launch an agent](https://app.heurastudios.com/signup) with one job. And tell us what you'd want your assistant to do: [email the founders](mailto:ryantian@ostravanne.com,leoli@ostravanne.com,ethanwang@ostravanne.com). We read every email.
