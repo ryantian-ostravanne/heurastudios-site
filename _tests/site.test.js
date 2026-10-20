@@ -43,7 +43,7 @@ test('every call to action is Launch an agent at app.heurastudios.com, with Log 
   for (const path of ['/', '/privacy/', '/terms/']) {
     const { page, errors, close } = await open(path);
     const starts = page.getByRole('link', { name: 'Launch an agent' });
-    assert.ok(await starts.count() >= (path === '/' ? 4 : 2), `${path}: header, hero, pricing and the closing band; the footer`);
+    assert.ok(await starts.count() >= (path === '/' ? 4 : 2), `${path}: header, hero and the closing band; the footer`);
     for (const href of await starts.evaluateAll(as => as.map(a => a.getAttribute('href')))) assert.equal(href, `${APP}/signup`, path);
     const logins = page.locator('header').getByRole('link', { name: 'Log in' });
     assert.equal(await logins.count(), 1, `${path}: Log in in the header`);
