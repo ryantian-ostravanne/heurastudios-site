@@ -1,4 +1,4 @@
-// The home page, editorial version: a serif headline on the page's left edge, real Heura Studios screens as the
+// The home page, editorial version: a large headline on the page's left edge, real Heura Studios screens as the
 // pictures, the models as a feature card and two smaller ones, How it works as a tour (each step brings its own
 // screen into a stage that stays put while the steps scroll by; at Launch the sample chat pops open), the starter
 // kits as a list, and an appearance setting (System, Light, Dark) in the footer. Things rise into place as they
