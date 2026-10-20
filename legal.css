@@ -17,16 +17,16 @@
 .lg-main ul { list-style: disc; }
 .lg-main ol { list-style: decimal; }
 .lg-main li::marker { color: var(--ink-2); }
-.lg-main strong { font-weight: 600; }
+.lg-main strong { font-weight: 700; }
 .lg-main a { text-decoration: underline; text-underline-offset: 3px; }
 
 .legal-table { width: 100%; margin: 8px 0 20px; border-collapse: collapse; font-size: 15px; }
 .legal-table th {
   padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); text-align: left;
-  color: var(--ink-2); font-size: 14px; font-weight: 500;
+  color: var(--ink-2); font-size: 14px; font-weight: 400;
 }
 .legal-table td { padding: 12px 12px 12px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
-.legal-table td:first-child { width: 28%; font-weight: 600; }
+.legal-table td:first-child { width: 28%; font-weight: 700; }
 .legal-table td:last-child { width: 20%; color: var(--ink-2); }
 
 /* phones: each row of the table becomes a small block, its cells labelled */

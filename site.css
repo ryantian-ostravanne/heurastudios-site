@@ -1,5 +1,6 @@
 /* heurastudios.com: one stylesheet for both pages.
-   Type: Newsreader (a serif) for headlines and lead paragraphs, Archivo for everything else.
+   Type: Cantarell for every word, the headlines and leads (var(--serif)) as well as the rest (var(--sans)), in the two
+   weights it has: 400, and 700 for the logo and the bold labels.
    Color: black ink on a white page, one grey for panels, and the Heura orange only in the logo and on Arche's status.
    Every color is a token, light by default, dark under html[data-theme="dark"] (set before the first paint by the
    inline script in each page's <head>) or, with JavaScript off, under the system's dark setting. The tokens are
@@ -29,8 +30,8 @@
   --field: #8a8a8a;   /* input borders: 3.4:1 */
   --accent: #ff4f00;  /* Heura orange */
   --foot-edge: #000000; /* the footer's top edge: in light it's the footer itself */
-  --sans: "Archivo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: "Cantarell", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --serif: "Cantarell", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --gutter: clamp(20px, 4vw, 48px);
   --header: 64px;
   color-scheme: light;
@@ -95,8 +96,9 @@ button, input { font: inherit; color: inherit; }
 }
 
 /* ---- type */
+/* sized for Cantarell, a little wider than the serif before it: "company’s own AI." keeps to one line beside the lead */
 .ov-display {
-  font-family: var(--serif); font-weight: 400; font-size: clamp(40px, 4.6vw + 18px, 80px);
+  font-family: var(--serif); font-weight: 400; font-size: clamp(40px, 4.4vw + 16px, 76px);
   line-height: 1.02; letter-spacing: -.022em; text-wrap: balance;
 }
 .ov-h2 {
@@ -114,7 +116,7 @@ button, input { font: inherit; color: inherit; }
 .ov-btn {
   position: relative; display: inline-flex; align-items: center; justify-content: center;
   min-height: 48px; padding: 0 24px; border: 0; border-radius: 999px; cursor: pointer;
-  font-family: var(--sans); font-size: 16px; font-weight: 500; line-height: 1; letter-spacing: -.005em; white-space: nowrap;
+  font-family: var(--sans); font-size: 16px; font-weight: 400; line-height: 1; letter-spacing: -.005em; white-space: nowrap;
   transition: background-color .15s ease, color .15s ease;
   -webkit-tap-highlight-color: transparent;
 }
@@ -136,7 +138,7 @@ button, input { font: inherit; color: inherit; }
 .ov-top-row { display: flex; align-items: center; gap: 24px; min-height: var(--header); }
 .ov-logo {
   display: inline-flex; align-items: center; gap: 10px; min-height: 44px; white-space: nowrap;
-  font-size: 17px; font-weight: 600; letter-spacing: -.015em; line-height: 1;
+  font-size: 17px; font-weight: 700; letter-spacing: -.015em; line-height: 1;
 }
 .ov-mark { position: relative; flex: none; width: 24px; height: 24px; border-radius: 6px; background: var(--ink); overflow: hidden; }
 .ov-mark::after { content: ""; position: absolute; left: 0; right: 0; top: 8px; height: 8px; background: var(--accent); }
@@ -148,7 +150,7 @@ button, input { font: inherit; color: inherit; }
 @media (hover: hover) { .ov-nav a:hover { color: var(--ink); } }
 .ov-nav-login {
   display: inline-flex; align-items: center; flex: none; min-height: 44px; padding: 0 12px; margin-left: -12px; border-radius: 8px;
-  font-size: 15px; font-weight: 500; color: var(--ink); white-space: nowrap;
+  font-size: 15px; font-weight: 400; color: var(--ink); white-space: nowrap;
 }
 .ov-top-row > .ov-btn { flex: none; }
 @media (max-width: 759px) {
@@ -158,6 +160,8 @@ button, input { font: inherit; color: inherit; }
 }
 @media (max-width: 419px) {   /* a phone: the logo, Log in and Get started share 360 px */
   .ov-top-row { gap: 10px; }
+  .ov-top-row > .ov-logo { font-size: 15px; }
+  .ov-top-row > .ov-btn { padding: 0 14px; }
   .ov-nav-login { padding: 0 6px; margin-right: -6px; }
 }
 @media (max-width: 359px) {   /* the narrowest phones: Log in stays in the footer */
@@ -216,7 +220,7 @@ button, input { font: inherit; color: inherit; }
 .ov-models { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 16px; }
 .ov-model { display: flex; flex-direction: column; min-height: 260px; padding: clamp(24px, 2.8vw, 40px); }
 .ov-model-main { grid-row: span 2; min-height: clamp(440px, 44vw, 600px); }
-.ov-status { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; line-height: 1.3; color: var(--ink-2); }
+.ov-status { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 400; line-height: 1.3; color: var(--ink-2); }
 .ov-status.is-available { color: var(--ink); }
 .ov-dot { position: relative; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
 .ov-dot::after { content: ""; position: absolute; inset: -5px; border: 1.5px solid var(--accent); border-radius: 50%; opacity: 0; pointer-events: none; }
@@ -262,7 +266,7 @@ button, input { font: inherit; color: inherit; }
 .ov-tour-text::after { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; transform-origin: 0 50%; }
 .ov-tour-text::before { background: var(--line); }
 .ov-tour-text::after { background: var(--ink); transform: scaleX(var(--fill, 1)); }
-.ov-step-n { display: block; font-size: 14px; font-weight: 500; line-height: 1.3; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.ov-step-n { display: block; font-size: 14px; font-weight: 400; line-height: 1.3; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .ov-tour-step h3 {
   margin-top: clamp(16px, 2vw, 24px); font-family: var(--serif); font-weight: 400;
   font-size: clamp(30px, 1.4vw + 20px, 40px); line-height: 1.08; letter-spacing: -.014em; transition: color .3s ease;
@@ -318,7 +322,7 @@ button, input { font: inherit; color: inherit; }
 .ov-kits { position: relative; }
 .ov-kits::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--ink); transform-origin: 0 50%; }
 .ov-kit { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 4px 24px; padding: 20px 0 21px; border-bottom: 1px solid var(--line); }
-.ov-kit h3, .ov-kit h4 { font-size: 17px; font-weight: 600; line-height: 1.4; letter-spacing: -.01em; }
+.ov-kit h3, .ov-kit h4 { font-size: 17px; font-weight: 700; line-height: 1.4; letter-spacing: -.01em; }
 .ov-kit-docs { font-size: 16px; line-height: 1.5; color: var(--ink-2); }
 .ov-kit-docs li { display: inline; }
 .ov-kit-docs li:not(:last-child)::after { content: ", "; }
@@ -348,7 +352,7 @@ button, input { font: inherit; color: inherit; }
 .ov-foot-top { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 40px clamp(32px, 5vw, 80px); }
 .ov-foot-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
 @media (max-width: 559px) { .ov-foot-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.ov-foot-title { font-size: 15px; font-weight: 600; line-height: 1.4; }
+.ov-foot-title { font-size: 15px; font-weight: 700; line-height: 1.4; }
 .ov-foot-cols ul { margin-top: 6px; }
 .ov-foot-cols a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink-2); transition: color .15s ease; }
 @media (hover: hover) { .ov-foot-cols a:hover { color: var(--ink); } }
@@ -367,7 +371,7 @@ button, input { font: inherit; color: inherit; }
 .ov-seg input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
 .ov-seg span {
   display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px;
-  font-size: 14px; font-weight: 500; line-height: 1; color: var(--ink-2); transition: background-color .15s ease, color .15s ease;
+  font-size: 14px; font-weight: 400; line-height: 1; color: var(--ink-2); transition: background-color .15s ease, color .15s ease;
 }
 .ov-seg input:checked + span { background: var(--ink); color: var(--page); }
 .ov-seg input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }

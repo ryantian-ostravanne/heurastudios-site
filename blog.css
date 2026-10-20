@@ -35,7 +35,7 @@
 /* ---- a post */
 .bl-byline { margin-top: 14px; color: var(--ink-2); }
 .bl-get { margin-top: 18px; }
-.bl-download { font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
+.bl-download { font-weight: 400; text-decoration: underline; text-underline-offset: 3px; }
 .bl-post { margin-top: clamp(28px, 4vw, 48px); }
 .bl-post > * + * { margin-top: 14px; }
 .bl-post p, .bl-post ul, .bl-post ol { max-width: 68ch; }
@@ -43,14 +43,14 @@
   margin-top: 48px; font-family: var(--serif); font-weight: 400; font-size: clamp(26px, .8vw + 21px, 32px);
   line-height: 1.15; letter-spacing: -.01em;
 }
-.bl-post h3 { margin-top: 28px; font-size: 18px; font-weight: 600; }
+.bl-post h3 { margin-top: 28px; font-size: 18px; font-weight: 700; }
 .bl-post h2 + *, .bl-post h3 + * { margin-top: 10px; }
 .bl-post ul, .bl-post ol { display: grid; gap: 8px; padding-left: 22px; }
 .bl-post ul { list-style: disc; }
 .bl-post ol { list-style: decimal; }
 .bl-post li::marker { color: var(--ink-2); }
 .bl-post a { text-decoration: underline; text-underline-offset: 3px; }
-.bl-post strong { font-weight: 600; }
+.bl-post strong { font-weight: 700; }
 .bl-post em { font-style: italic; }
 .bl-post blockquote { padding-left: 16px; border-left: 2px solid var(--rule); color: var(--ink-2); }
 .bl-post code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .9em; }
@@ -59,7 +59,7 @@
   display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse;
   font-size: 15px; font-variant-numeric: tabular-nums;
 }
-.bl-post th { padding: 10px 18px 10px 0; border-bottom: 1px solid var(--ink); text-align: left; font-weight: 500; vertical-align: bottom; }
+.bl-post th { padding: 10px 18px 10px 0; border-bottom: 1px solid var(--ink); text-align: left; font-weight: 400; vertical-align: bottom; }
 .bl-post td { padding: 11px 18px 11px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
 .bl-post th:first-child, .bl-post td:first-child { min-width: 14em; }
 .bl-post th:not(:first-child), .bl-post td:not(:first-child) { white-space: nowrap; }   /* numbers and short words: one line */
