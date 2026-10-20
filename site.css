@@ -153,7 +153,7 @@ button, input { font: inherit; color: inherit; }
   font-size: 15px; font-weight: 400; color: var(--ink); white-space: nowrap;
 }
 .ov-top-row > .ov-btn { flex: none; }
-@media (max-width: 959px) {   /* the five sections and Launch an agent need the room of a laptop's window */
+@media (max-width: 879px) {   /* the four sections and Launch an agent need this much room */
   .ov-nav { display: none; }
   .ov-nav-login { margin-left: auto; }
   .ov-top-row > .ov-btn { margin-left: 0; }
@@ -339,34 +339,6 @@ button, input { font: inherit; color: inherit; }
 .ov-byo-title {
   font-family: var(--serif); font-weight: 400; font-size: clamp(26px, 1.4vw + 18px, 40px);
   line-height: 1.1; letter-spacing: -.016em; text-wrap: balance;
-}
-
-/* ---- pricing: Free, Pro and Max side by side. Each card's parts sit on rows the three share (a subgrid), so their
-   numbers line up across them. One under another below a laptop's width. */
-.ov-plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-.ov-plan {
-  display: grid; grid-row: span 5; grid-template-rows: subgrid; row-gap: 0; align-content: start;
-  padding: clamp(24px, 2.8vw, 40px);
-}
-.ov-plan-name {
-  font-family: var(--serif); font-weight: 400; font-size: clamp(28px, 1vw + 20px, 36px); line-height: 1.05; letter-spacing: -.015em;
-}
-.ov-plan-price { margin-top: 24px; font-size: 16px; line-height: 1.3; color: var(--ink-2); }
-.ov-plan-amount {
-  margin-right: 4px; font-family: var(--serif); font-size: clamp(44px, 2vw + 30px, 64px); line-height: 1; letter-spacing: -.024em;
-  color: var(--ink); font-variant-numeric: tabular-nums;
-}
-.ov-plan-text { margin-top: 14px; max-width: 26em; font-size: 16px; line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
-.ov-plan-list { display: grid; align-content: start; gap: 10px; margin-top: 20px; font-size: 15px; line-height: 1.45; }
-.ov-plan-list li { position: relative; padding-left: 24px; text-wrap: pretty; }
-.ov-plan-list li::before {   /* a check, drawn in the ink */
-  content: ""; position: absolute; left: 2px; top: .38em; width: 11px; height: 6px;
-  border-left: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); transform: rotate(-45deg);
-}
-.ov-plans-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 40px; margin-top: 28px; }
-.ov-plans-fine { max-width: 46em; font-size: 15px; line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
-@media (max-width: 899px) {
-  .ov-plans { grid-template-columns: minmax(0, 1fr); max-width: 560px; }
 }
 
 /* ---- closing: the same shape as the hero */
