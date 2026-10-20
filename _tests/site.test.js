@@ -36,18 +36,19 @@ async function fill(page, email, company) {
 }
 
 // Launch (Ryan, Oct 14, 2026): the app is open to anyone at app.heurastudios.com, so every call to action signs up there,
-// beside a Log in link, on the home page and both legal pages. The waitlist page stays for anyone who follows an old link.
-// Oct 19, 2026 (Ryan: "instead of get started use like Launch an agent"): the calls to action say Launch an agent.
+// on the home page and both legal pages. The waitlist page stays for anyone who follows an old link.
+// Oct 19, 2026 (Ryan: "instead of get started use like Launch an agent"): the calls to action say Launch an agent. And
+// Log in is behind it ("remove the login on the main page and only have the option when i click Launch an Agent"): the
+// sign-up page it opens says Already have an account? Log in.
 const APP = 'https://app.heurastudios.com';
-test('every call to action is Launch an agent at app.heurastudios.com, with Log in beside it', async () => {
+test('every call to action is Launch an agent at app.heurastudios.com, and Log in is behind it', async () => {
   for (const path of ['/', '/privacy/', '/terms/']) {
     const { page, errors, close } = await open(path);
     const starts = page.getByRole('link', { name: 'Launch an agent' });
     assert.ok(await starts.count() >= (path === '/' ? 4 : 2), `${path}: header, hero and the closing band; the footer`);
     for (const href of await starts.evaluateAll(as => as.map(a => a.getAttribute('href')))) assert.equal(href, `${APP}/signup`, path);
-    const logins = page.locator('header').getByRole('link', { name: 'Log in' });
-    assert.equal(await logins.count(), 1, `${path}: Log in in the header`);
-    assert.equal(await logins.getAttribute('href'), `${APP}/login`, path);
+    assert.equal(await page.getByRole('link', { name: 'Log in' }).count(), 0, `${path}: no Log in`);
+    assert.equal(await page.locator(`a[href^="${APP}/login"]`).count(), 0, path);
     assert.equal(await page.getByRole('link', { name: 'Join waitlist' }).count(), 0, `${path}: no waitlist buttons`);
     assert.equal(await page.getByRole('link', { name: 'Get started' }).count(), 0, `${path}: no Get started left`);
     const text = await page.evaluate(() => document.body.innerText);
@@ -55,6 +56,14 @@ test('every call to action is Launch an agent at app.heurastudios.com, with Log 
     assert.deepEqual(errors, [], path);
     await close();
   }
+});
+
+test('no Log in on the waitlist page either', async () => {
+  const { page, errors, close } = await open('/waitlist/');
+  assert.equal(await page.getByRole('link', { name: 'Log in' }).count(), 0);
+  assert.equal(await page.locator(`a[href^="${APP}/login"]`).count(), 0);
+  assert.deepEqual(errors, []);
+  await close();
 });
 
 test('"Email the founders" writes to Ryan, Leo and Ethan, on both pages', async () => {

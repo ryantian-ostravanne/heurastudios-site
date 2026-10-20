@@ -151,17 +151,16 @@ test('every page links to the blog from its header and its footer', async () => 
   }
 });
 
-// Launch: the blog's header and footer match every other page's, with Launch an agent and Log in at app.heurastudios.com.
+// Launch: the blog's header and footer match every other page's, with Launch an agent at app.heurastudios.com and no Log
+// in (Ryan, Oct 19: it's behind Launch an agent).
 const APP = 'https://app.heurastudios.com';
-test('the blog has Launch an agent and Log in at app.heurastudios.com, like every other page', async () => {
+test('the blog has Launch an agent at app.heurastudios.com and no Log in, like every other page', async () => {
   for (const p of ['/blog/', POST, SMB]) {
     const { page, errors, close } = await open(p);
     const starts = page.locator('header, footer').getByRole('link', { name: 'Launch an agent' });   // a post may have its own
     assert.equal(await starts.count(), 2, `${p}: in the header and the footer`);
     for (const href of await starts.evaluateAll(as => as.map(a => a.getAttribute('href')))) assert.equal(href, `${APP}/signup`, p);
-    const logins = page.locator('header, footer').getByRole('link', { name: 'Log in' });
-    assert.equal(await logins.count(), 2, `${p}: in the header and the footer`);
-    for (const href of await logins.evaluateAll(as => as.map(a => a.getAttribute('href')))) assert.equal(href, `${APP}/login`, p);
+    assert.equal(await page.getByRole('link', { name: 'Log in' }).count(), 0, `${p}: no Log in`);
     assert.equal(await page.getByRole('link', { name: 'Join waitlist' }).count(), 0, `${p}: no waitlist buttons`);
     assert.deepEqual(errors, [], p);
     await close();

@@ -185,7 +185,7 @@ test('the page sells Heura Studios first: How it works and Starter kits come bef
   assert.match(await page.locator('#how .ov-section-lead').innerText(), /Heura Studios/);
   assert.match(await page.locator('meta[name="description"]').getAttribute('content'), /Heura Studios/);
   assert.deepEqual(await page.locator('footer nav').first().locator('a').allTextContents(),
-    ['How it works', 'Starter kits', 'Models', 'Launch an agent', 'Log in', 'Blog'], 'the footer lists them in the same order');
+    ['How it works', 'Starter kits', 'Models', 'Launch an agent', 'Blog'], 'the footer lists them in the same order');
   await close();
 });
 
