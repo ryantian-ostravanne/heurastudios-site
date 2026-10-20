@@ -20,7 +20,7 @@
 }
 .wl-fields { display: grid; gap: 20px; margin-top: 36px; }
 .wl-field { display: grid; gap: 8px; }
-.wl-field label { font-size: 15px; font-weight: 600; line-height: 1.3; }
+.wl-field label { font-size: 15px; font-weight: 700; line-height: 1.3; }
 .wl-field input {
   display: block; width: 100%; height: 52px; margin: 0; padding: 0 16px;
   border: 1px solid var(--field); border-radius: 12px; background: var(--page); color: var(--ink);
@@ -36,7 +36,7 @@
   -webkit-text-fill-color: var(--ink); -webkit-box-shadow: 0 0 0 1000px var(--page) inset; caret-color: var(--ink);
 }
 .wl-trap { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
-.wl-error { margin-top: 14px; font-size: 15px; font-weight: 600; line-height: 1.45; color: var(--bad); }
+.wl-error { margin-top: 14px; font-size: 15px; font-weight: 700; line-height: 1.45; color: var(--bad); }
 .wl-error:empty { display: none; }
 .wl-submit { width: 100%; margin-top: 28px; }
 .wl-submit[disabled] { opacity: .6; cursor: progress; }
