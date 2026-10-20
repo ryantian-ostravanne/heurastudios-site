@@ -35,20 +35,21 @@ async function fill(page, email, company) {
   await page.getByRole('button', { name: 'Join waitlist' }).click();
 }
 
-// Launch (Ryan, Oct 14, 2026): the app is open to anyone at app.heurastudios.com, so every call to action is Get started
-// (sign up there) beside a Log in link, on the home page and both legal pages. The waitlist page stays for anyone
-// who follows an old link.
+// Launch (Ryan, Oct 14, 2026): the app is open to anyone at app.heurastudios.com, so every call to action signs up there,
+// beside a Log in link, on the home page and both legal pages. The waitlist page stays for anyone who follows an old link.
+// Oct 19, 2026 (Ryan: "instead of get started use like Launch an agent"): the calls to action say Launch an agent.
 const APP = 'https://app.heurastudios.com';
-test('every call to action is Get started at app.heurastudios.com, with Log in beside it', async () => {
+test('every call to action is Launch an agent at app.heurastudios.com, with Log in beside it', async () => {
   for (const path of ['/', '/privacy/', '/terms/']) {
     const { page, errors, close } = await open(path);
-    const starts = page.getByRole('link', { name: 'Get started' });
-    assert.ok(await starts.count() >= (path === '/' ? 3 : 1), `${path}: header, hero and the closing band`);
+    const starts = page.getByRole('link', { name: 'Launch an agent' });
+    assert.ok(await starts.count() >= (path === '/' ? 4 : 2), `${path}: header, hero, pricing and the closing band; the footer`);
     for (const href of await starts.evaluateAll(as => as.map(a => a.getAttribute('href')))) assert.equal(href, `${APP}/signup`, path);
     const logins = page.locator('header').getByRole('link', { name: 'Log in' });
     assert.equal(await logins.count(), 1, `${path}: Log in in the header`);
     assert.equal(await logins.getAttribute('href'), `${APP}/login`, path);
     assert.equal(await page.getByRole('link', { name: 'Join waitlist' }).count(), 0, `${path}: no waitlist buttons`);
+    assert.equal(await page.getByRole('link', { name: 'Get started' }).count(), 0, `${path}: no Get started left`);
     const text = await page.evaluate(() => document.body.innerText);
     if (path === '/') assert.doesNotMatch(text, /early access|store/i, path);   // the home page's copy; the legal text says both
     assert.deepEqual(errors, [], path);
