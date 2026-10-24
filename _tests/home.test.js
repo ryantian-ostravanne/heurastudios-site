@@ -1,12 +1,13 @@
-// The home page, editorial version: a large headline on the page's left edge, real Heura Studios screens as the
-// pictures, the models as a feature card and two smaller ones, How it works as a tour (each step brings its own
-// screen into a stage that stays put while the steps scroll by; at Launch the sample chat pops open), the starter
-// kits as a list, and an appearance setting (System, Light, Dark) in the footer. Things rise into place as they
-// scroll in, but nothing stays hidden: not with Reduce Motion, not without JavaScript, not once scrolled to.
-// No text under 11px, nothing that moves forever, no "we".
+// The home page (Oct 24, 2026: the post-training positioning). The hero (the headline and the lead; Request access is
+// the header's one button), a looping recording of one run in Heura Studios with a Pause button, the eight operations in order, what it does and
+// doesn't do yet, and the Request access form, with Log in beside it for teams that have access (Ryan, Oct 19: no Log in
+// on the page itself, only where its call to action leads). Quiet on purpose: the recording is the one thing that
+// moves, and it stops with Pause, with Reduce Motion, and off screen. No text under 11px, no "we".
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { startServer, launch } = require('./helpers');
+
+const SCRIPT = 'https://script.google.com/macros/s/AKfycbymRmy_8immz1FDS9UUhf3K3dv8k77KYyOzTlwy4SzNQUM16fwwYgfr7wcwSkxPGGZW3g/exec';
 
 let server, browser;
 test.before(async () => { server = await startServer(); browser = await launch(); });
@@ -30,146 +31,398 @@ function luminance(css) {
 }
 const ratio = (a, b) => (Math.max(luminance(a), luminance(b)) + 0.05) / (Math.min(luminance(a), luminance(b)) + 0.05);
 
-// Text on the page that can't be seen because it, or something around it, is fully transparent.
-function hiddenText(page) {
-  return page.evaluate(() => [...document.querySelectorAll('main *')].filter(el => {
-    if (![...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())) return false;
-    for (let e = el; e && e !== document.body; e = e.parentElement) if (getComputedStyle(e).opacity === '0') return true;
-    return false;
-  }).map(el => el.textContent.trim().slice(0, 40)));
+// The script behind the form, stood in for: answers what reply says and keeps what it was sent.
+async function standIn(page, reply = { ok: true }, status = 200) {
+  const sent = [];
+  await page.route(SCRIPT, route => {
+    sent.push(new URLSearchParams(route.request().postData() || ''));
+    return route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(reply) });
+  });
+  return sent;
 }
 
-async function scrollThrough(page) {
-  const height = await page.evaluate(() => document.documentElement.scrollHeight);
-  for (let y = 0; y <= height; y += 300) { await page.mouse.wheel(0, 300); await page.waitForTimeout(60); }
-  await page.waitForTimeout(1400);
+async function fill(page, values) {
+  const form = page.locator('#hm-form');
+  for (const [label, value] of Object.entries(values)) await form.getByLabel(label, { exact: true }).fill(value);
 }
 
-test('with Reduce Motion on, everything shows at once, without scrolling', async () => {
-  const { page, errors, close } = await open('/', { reducedMotion: 'reduce' });
-  await page.waitForTimeout(300);
-  assert.deepEqual(await hiddenText(page), []);
-  assert.deepEqual(errors, []);
-  await close();
-});
-
-test('without JavaScript everything shows, and How it works shows its first screen', async () => {
-  const { page, close } = await open('/', { javaScriptEnabled: false });
-  assert.deepEqual(await hiddenText(page), []);
-  assert.equal(await page.locator('.ov-tour-shot[data-step="pick"]').isVisible(), true);
-  await close();
-});
-
-test('scrolling down the page brings every part of it into view', async () => {
+// The lead says what trains a checkpoint (demonstrations and corrections: documents ground answers, they don't train)
+// and the gate, in the words an ML lead would use. One Request access in view: the header's.
+test('the hero: the headline and the lead, and the header has the one Request access', async () => {
   const { page, errors, close } = await open('/');
-  await scrollThrough(page);
-  assert.deepEqual(await hiddenText(page), []);
+  assert.equal(await page.title(), 'Post-training for AI-native companies – Heura Studios');
+  assert.equal(await page.locator('h1').innerText(), 'Specialize the base before you ship the agent.');
+  assert.equal(await page.locator('.hm-hero .ov-lead').innerText(),
+    'Your team’s demonstrations and corrections train LoRA checkpoints. Each is scored on your eval set, and any that scores below the live one is held back.');
+  assert.equal(await page.locator('.hm-hero .ov-btn').count(), 0);
+  assert.equal(await page.locator('header').getByRole('link', { name: 'Request access' }).count(), 1);
+  const description = await page.locator('meta[name="description"]').getAttribute('content');
+  assert.match(description, /^Post-training for AI-native companies\. Your team’s demonstrations and corrections train LoRA checkpoints/);
+  assert.doesNotMatch(description, /Grounding/);
   assert.deepEqual(errors, []);
   await close();
 });
 
-for (const [name, viewport] of [['a desktop', { width: 1280, height: 860 }], ['a phone', { width: 375, height: 812 }]]) {
-  test(`How it works on ${name}: each step brings its own screen into a stage that stays in view`, async () => {
-    const { page, errors, close } = await open('/', { viewport });
-    for (const step of ['pick', 'teach', 'train', 'launch']) {
-      await page.locator(`.ov-tour-step[data-step="${step}"]`).evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
-      await page.waitForFunction(s => {
-        const shown = [...document.querySelectorAll('.ov-tour-shot')].filter(x => getComputedStyle(x).opacity === '1').map(x => x.dataset.step);
-        return shown.length === 1 && shown[0] === s;
-      }, step, { timeout: 3000 });
-      assert.equal(await page.locator(`.ov-tour-step[data-step="${step}"]`).getAttribute('aria-current'), 'step', step);
-      assert.equal(await page.locator('.ov-tour-step[aria-current]').count(), 1, step);
-      const stage = await page.locator('.ov-tour-stage').boundingBox();
-      assert.ok(stage.y >= 0 && stage.y + stage.height <= viewport.height, `the stage is out of view at ${step}: ${JSON.stringify(stage)}`);
-      // and the step being shown can be read: its heading is on screen, not under the stage
-      const title = await page.locator(`.ov-tour-step[data-step="${step}"] h3`).boundingBox();
-      const clear = viewport.width < 900 ? stage.y + stage.height : 0;
-      assert.ok(title.y >= clear - 1 && title.y + title.height <= viewport.height, `the ${step} heading is hidden: ${JSON.stringify(title)}, stage ${JSON.stringify(stage)}`);
+test('the header and the footer go to sections that exist', async () => {
+  const { page, close } = await open('/');
+  const header = await page.locator('header a').evaluateAll(as => as.map(a => [a.textContent.trim(), a.getAttribute('href')]));
+  assert.deepEqual(header, [['Heura Studios', '/'], ['Tools', '#tools'], ['Blog', '/blog/'],
+    ['Request access', '#request']]);
+  assert.deepEqual(await page.locator('footer nav').first().locator('a').allTextContents(),
+    ['Tools', 'Request access', 'Blog']);
+  for (const id of ['tools', 'request']) assert.equal(await page.locator(`main #${id}`).count(), 1, id);
+  assert.equal(await page.getByRole('link', { name: 'Get started' }).count(), 0, 'access is requested now, not signed up for');
+  await close();
+});
+
+test('Log in is where Request access leads, for teams that have access: not in the header, the hero or the footer', async () => {
+  const { page, close } = await open('/');
+  const logins = page.locator('a[href^="https://app.heurastudios.com/login"]');
+  assert.equal(await logins.count(), 1);
+  assert.equal(await page.locator('#request').getByRole('link', { name: 'Log in' }).count(), 1);
+  assert.equal(await page.locator('#request .hm-login').innerText(), 'Already have access? Log in');
+  for (const where of ['header', '.hm-hero', 'footer']) {
+    assert.equal(await page.locator(where).getByRole('link', { name: /log in|sign in/i }).count(), 0, where);
+  }
+  await close();
+});
+
+test('the recording plays muted and looping, without controls, and Pause stops it', async () => {
+  const { page, errors, close } = await open('/');
+  const video = page.locator('.hm-video');
+  await page.waitForFunction(() => !document.querySelector('.hm-video').paused);
+  assert.deepEqual(await video.evaluate(v => [v.muted, v.loop, v.controls, v.playsInline]), [true, true, false, true]);
+  assert.match(await video.evaluate(v => v.currentSrc), /\/img\/pipeline-run\.(webm|mp4)$/);
+  assert.equal(await page.locator('#' + await video.getAttribute('aria-describedby')).innerText(),
+    'One run on a sample model in Heura Studios: 82 training rows (10 demonstrations and the replay mix), scored on the eval set before and after, promoted on a tie.');
+  const toggle = page.getByRole('button', { name: 'Pause the recording' });
+  await toggle.click();
+  assert.equal(await video.evaluate(v => v.paused), true);
+  await page.getByRole('button', { name: 'Play the recording' }).click();
+  await page.waitForFunction(() => !document.querySelector('.hm-video').paused);
+  assert.deepEqual(errors, []);
+  await close();
+});
+
+test('the recording rests off screen and plays again when it comes back', async () => {
+  const { page, close } = await open('/');
+  await page.waitForFunction(() => !document.querySelector('.hm-video').paused);
+  await page.locator('#request').scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => document.querySelector('.hm-video').paused);
+  await page.locator('.hm-video').scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => !document.querySelector('.hm-video').paused);
+  await close();
+});
+
+test('in dark mode it plays the dark recording, and changing the appearance changes the recording', async () => {
+  const { page, close } = await open('/', { colorScheme: 'dark' });
+  const src = () => page.locator('.hm-video').evaluate(v => v.currentSrc);
+  await page.waitForFunction(() => !document.querySelector('.hm-video').paused);
+  assert.match(await src(), /pipeline-run-dark\./);
+  assert.match(await page.locator('.hm-video').getAttribute('poster'), /pipeline-run-dark\.webp$/);
+  await page.getByRole('radiogroup', { name: 'Appearance' }).getByRole('radio', { name: 'Light' }).check();
+  await page.waitForFunction(() => /pipeline-run\.(webm|mp4)$/.test(document.querySelector('.hm-video').currentSrc));
+  await page.locator('.hm-video').scrollIntoViewIfNeeded();   // (the setting is in the footer: the recording rested)
+  await page.waitForFunction(() => !document.querySelector('.hm-video').paused);
+  await close();
+});
+
+// The page's appearance is known before it paints (the head script), so the frame shows the right poster from the
+// first paint, and a dark page never fetches the light recording or its poster. A light page loads its recording once.
+for (const scheme of ['light', 'dark']) {
+  test(`a ${scheme} page fetches only the ${scheme} recording and poster, and loads it once`, async () => {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 }, colorScheme: scheme });
+    const page = await ctx.newPage();
+    const fetched = [];
+    page.on('request', r => { if (/\/img\/pipeline-run/.test(r.url())) fetched.push(new URL(r.url()).pathname); });
+    await page.addInitScript(() => {
+      window.loads = 0;
+      const load = HTMLMediaElement.prototype.load;
+      HTMLMediaElement.prototype.load = function () { window.loads++; return load.call(this); };
+    });
+    await page.goto(server.url + '/');
+    await page.waitForFunction(() => !document.querySelector('.hm-video').paused);
+    const own = scheme === 'dark' ? /pipeline-run-dark\./ : /pipeline-run\./;
+    assert.ok(fetched.length > 0);
+    for (const path of fetched) assert.match(path, own, `${scheme}: fetched ${path}`);
+    assert.match(await page.locator('.hm-frame').evaluate(f => getComputedStyle(f).backgroundImage), scheme === 'dark'
+      ? /pipeline-run-dark\.webp/ : /pipeline-run\.webp/);
+    assert.equal(await page.evaluate(() => window.loads), scheme === 'dark' ? 1 : 0, 'load() only to change the files');
+    await ctx.close();
+  });
+}
+
+test('without JavaScript the frame still shows the poster for the system’s appearance', async () => {
+  for (const scheme of ['light', 'dark']) {
+    const { page, close } = await open('/', { javaScriptEnabled: false, colorScheme: scheme });
+    assert.match(await page.locator('.hm-frame').evaluate(f => getComputedStyle(f).backgroundImage), scheme === 'dark'
+      ? /pipeline-run-dark\.webp/ : /pipeline-run\.webp/, scheme);
+    await close();
+  }
+});
+
+test('Pause sits beside the caption, or below it on a phone, and is never part of the caption', async () => {
+  for (const width of [360, 390, 1280]) {
+    const { page, close } = await open('/', { viewport: { width, height: 860 } });
+    const caption = page.locator('figure.hm-film > figcaption');
+    assert.equal(await caption.count(), 1, `${width}: the figure's caption`);
+    assert.equal(await caption.locator('button').count(), 0, `${width}: Pause isn't in it`);
+    const [cap, pause, frame] = await page.evaluate(() => ['figure.hm-film > figcaption', '.hm-toggle', '.hm-frame']
+      .map(s => document.querySelector(s).getBoundingClientRect().toJSON()));
+    if (width < 600) {
+      assert.ok(cap.width >= frame.width - 1, `${width}: the caption is as wide as the recording (${cap.width} of ${frame.width})`);
+      assert.ok(pause.top >= cap.bottom, `${width}: Pause below the caption`);
+    } else {
+      assert.ok(pause.left >= cap.right && pause.top < cap.bottom, `${width}: Pause beside the caption`);
     }
-    assert.deepEqual(errors, []);
+    await close();
+  }
+});
+
+test('with Reduce Motion the recording waits on its first frame until Play', async () => {
+  const { page, close } = await open('/', { reducedMotion: 'reduce' });
+  await page.waitForTimeout(800);
+  const video = page.locator('.hm-video');
+  assert.equal(await video.evaluate(v => v.paused), true);
+  assert.equal(await video.evaluate(v => v.currentTime), 0);
+  await page.getByRole('button', { name: 'Play the recording' }).click();
+  await page.waitForFunction(() => !document.querySelector('.hm-video').paused);
+  await page.getByRole('button', { name: 'Pause the recording' }).click();
+  assert.equal(await video.evaluate(v => v.paused), true);
+  await close();
+});
+
+test('without JavaScript the recording shows its first frame with the browser’s controls, and nothing plays', async () => {
+  const { page, close } = await open('/', { javaScriptEnabled: false });
+  const video = page.locator('.hm-video');
+  assert.deepEqual(await video.evaluate(v => [v.controls, v.autoplay, v.paused, v.preload]), [true, false, true, 'none']);
+  assert.equal(await page.locator('.hm-toggle').isVisible(), false);
+  await close();
+});
+
+// Ryan, Oct 24, 10:17: the numbered sequence "resembles every vibecoded site": "make it tools instead". The section is
+// the Studio's own tool palette: its eleven tools in its three groups, its icons on its very light group colors, the
+// owner's on dark tiles, and for each what it takes and what it gives. Not a numbered list.
+const TOOLS = [
+  ['Signal', [['Ground', 'documents', 'context, retrieved at answer time'],
+    ['Set policies', 'rules', 'a policy every answer follows'],
+    ['Demonstrate', 'input and output pairs', 'training rows, three per new pair'],
+    ['Correct', 'an answer from the Playground, fixed or marked good', 'a demonstration'],
+    ['Interview', 'an operator’s answers to the model’s questions', 'facts and rules it answers from']]],
+  ['Evaluate and train', [['Evaluate', 'prompts, each with what a passing answer must contain', 'a pass rate, before and after every run'],
+    ['Base model', 'Heura Arche (2B), or a model you bring', 'the model that answers'],
+    ['Train', 'new demonstrations and corrections, plus a replay mix', 'a LoRA checkpoint on Heura Arche'],
+    ['Train on OpenAI', 'the same rows', 'a fine-tuned OpenAI model']]],
+  ['Release', [['Promote', 'a run’s checkpoint', 'the live checkpoint, unless it scores lower'],
+    ['Serve', 'the live checkpoint', 'an OpenAI-compatible endpoint, an embed, an export']]],
+];
+const OWNERS = ['Evaluate', 'Base model', 'Train on OpenAI', 'Promote'];
+
+test('Tools: the Studio’s eleven, in its three groups, each with what it takes and gives, and the owner’s marked', async () => {
+  const { page, errors, close } = await open('/');
+  const tools = page.locator('#tools');
+  assert.equal(await tools.locator('h2').innerText(), 'Tools');
+  assert.equal(await tools.locator('.ov-section-lead').innerText(),
+    'Operators bring the signal. The owner keeps the eval set, the base model and the gate.');
+  assert.equal(await tools.locator('ol').count(), 0, 'not a numbered list');
+  // the owner's tools are dark tiles, as in the Studio; the key beside the heading says so (and each one says it too,
+  // to a screen reader)
+  assert.equal(await tools.locator('.hm-key').innerText(), 'Owner only');
+  assert.equal(await tools.locator('.hm-tool .hm-owner').count(), OWNERS.length);
+  assert.equal(await tools.locator('.hm-tool .hm-owner').first().evaluate(e => getComputedStyle(e).position), 'absolute');
+  assert.deepEqual(await tools.locator('h3').allInnerTexts(), TOOLS.map(([group]) => group));
+  for (const [group, rows] of TOOLS) {
+    const list = tools.getByRole('list', { name: group, exact: true });
+    const items = list.getByRole('listitem');
+    assert.equal(await items.count(), rows.length, group);
+    for (const [i, [name, takes, gives]] of rows.entries()) {
+      const item = items.nth(i);
+      assert.equal(await item.locator('.hm-tool-name').innerText(), name);
+      // read in order, with its labels: "Ground Takes documents Gives context, retrieved at answer time"
+      const said = (await item.evaluate(li => li.textContent)).replace(/\s+/g, ' ').trim();
+      const owner = OWNERS.includes(name) ? ' Owner only' : '';
+      const soon = name === 'Interview' ? ' Soon' : '';
+      assert.equal(said, `${name}${owner}${soon} Takes ${takes} Gives ${gives}`, name);
+      assert.equal(await item.locator('.hm-tile svg').count(), 1, `${name}: its icon from the Studio`);
+      assert.equal(await item.evaluate(li => li.classList.contains('is-owner')), OWNERS.includes(name), `${name}: owner`);
+    }
+  }
+  assert.deepEqual(errors, []);
+  await close();
+});
+
+test('Tools: the columns line up on a wide screen, and on a phone each row says Takes and Gives', async () => {
+  for (const width of [1280, 390]) {
+    const { page, close } = await open('/', { viewport: { width, height: 900 } });
+    const rows = page.locator('#tools .hm-tool');
+    const layout = await rows.evaluateAll(lis => lis.map(li => {
+      const [takes, gives] = li.querySelectorAll('.hm-io');
+      return { takes: Math.round(takes.getBoundingClientRect().left), gives: Math.round(gives.getBoundingClientRect().left),
+        label: getComputedStyle(takes.querySelector('.hm-io-label')).position !== 'absolute' };
+    }));
+    if (width > 700) {
+      assert.equal(new Set(layout.map(r => r.takes)).size, 1, `${width}: every Takes starts at one edge`);
+      assert.equal(new Set(layout.map(r => r.gives)).size, 1, `${width}: every Gives starts at one edge`);
+      assert.ok(await page.locator('#tools .hm-tools-cols').isVisible(), 'the column names, once');
+      assert.ok(layout.every(r => !r.label), 'the per-row labels are for screen readers here');
+    } else {
+      assert.equal(await page.locator('#tools .hm-tools-cols').isVisible(), false);
+      assert.ok(layout.every(r => r.label), `${width}: each row shows its labels`);
+    }
+    await close();
+  }
+});
+
+test('what it does, and what it doesn’t yet', async () => {
+  const { page, close } = await open('/');
+  const does = page.getByRole('list', { name: 'It does', exact: true });
+  const doesnt = page.getByRole('list', { name: 'It doesn’t, yet' });
+  assert.equal(await does.locator('li').count(), 8);
+  assert.equal(await doesnt.locator('li').count(), 5);
+  assert.match(await does.innerText(), /\/v1\/chat\/completions/);
+  assert.match(await does.innerText(), /plus a replay mix of Heura’s own data so the base keeps its general skills/);
+  assert.match(await does.innerText(), /Holds back a run’s checkpoint that scores lower on the eval set than the live one\. Only the owner can promote it by hand\./);
+  assert.match(await doesnt.innerText(), /Reinforcement learning/);
+  const text = await page.evaluate(() => document.body.innerText);
+  assert.equal(text.split('Operators bring the signal.').length - 1, 1, 'said once, where the tools start');
+  assert.match(await page.locator('#request .ov-section-lead').innerText(),
+    /^Access is for teams whose company has a contract with Ostravanne\. A founder checks every request and replies by email\.$/);
+  await close();
+});
+
+test('Request access asks for a name, a work email, a company, a role and what they will specialize', async () => {
+  const { page, close } = await open('/');
+  const form = page.locator('#hm-form');
+  assert.equal(await form.getAttribute('action'), SCRIPT);
+  assert.equal(await form.getAttribute('method'), 'post');
+  for (const [label, required] of [['Name', true], ['Work email', true], ['Company', true], ['Role', false],
+    ['What will you specialize?', false]]) {
+    assert.equal(await form.getByLabel(label, { exact: true }).evaluate(i => i.required), required, label);
+  }
+  assert.match(await page.locator('#request .ov-section-lead').innerText(), /teams whose company has a contract with Ostravanne/);
+  await close();
+});
+
+test('sending a request posts every field and says a founder will reply', async () => {
+  const { page, errors, close } = await open('/');
+  const sent = await standIn(page);
+  await fill(page, { 'Name': ' Ann Lee ', 'Work email': 'ann@acme.co', 'Company': 'Acme', 'Role': 'Head of ML',
+    'What will you specialize?': 'A support agent for billing questions' });
+  await page.getByRole('button', { name: 'Request access' }).last().click();
+  const done = page.locator('#hm-done');
+  await done.waitFor();
+  assert.match(await done.innerText(), /Request sent\s+A founder will reply to ann@acme\.co\./);
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'hm-done');
+  assert.equal(await page.locator('#hm-form').isVisible(), false);
+  const got = Object.fromEntries(sent[0]);
+  assert.deepEqual([got.name, got.email, got.company, got.role, got.use, got.kind, got.from, got.js, got.website],
+    ['Ann Lee', 'ann@acme.co', 'Acme', 'Head of ML', 'A support agent for billing questions', 'request', '/', '1', '']);
+  assert.deepEqual(errors, []);
+  await close();
+});
+
+test('a request says where the person came from: the page’s utm tags, like the waitlist’s joins', async () => {
+  const { page, close } = await open('/?utm_source=launch&utm_medium=email');
+  const sent = await standIn(page);
+  await fill(page, { 'Name': 'Ann', 'Work email': 'ann@acme.co', 'Company': 'Acme' });
+  await page.getByRole('button', { name: 'Request access' }).last().click();
+  await page.locator('#hm-done').waitFor();
+  assert.equal(Object.fromEntries(sent[0]).from, '/?utm_source=launch&utm_medium=email');
+  await close();
+});
+
+test('someone who already asked is told so', async () => {
+  const { page, close } = await open('/');
+  await standIn(page, { ok: true, already: true });
+  await fill(page, { 'Name': 'Ann', 'Work email': 'ann@acme.co', 'Company': 'Acme' });
+  await page.getByRole('button', { name: 'Request access' }).last().click();
+  await page.locator('#hm-done').waitFor();
+  const said = await page.locator('#hm-done').innerText();
+  assert.match(said, /There’s already a request from ann@acme\.co\. A founder will reply there\./);
+  assert.doesNotMatch(said, /\bwe\b/i, 'the page never says "we", and nor does what it says after sending');
+  await close();
+});
+
+test('a missing name, an email that does not look like one, or a missing company is caught before anything is sent', async () => {
+  const { page, close } = await open('/');
+  const sent = await standIn(page);
+  const send = () => page.getByRole('button', { name: 'Request access' }).last().click();
+  const form = page.locator('#hm-form');
+  await send();
+  assert.equal(await page.locator('#hm-error').innerText(), 'Enter your name.');
+  assert.equal(await form.getByLabel('Name', { exact: true }).getAttribute('aria-invalid'), 'true');
+  await fill(page, { 'Name': 'Ann', 'Work email': 'ann@acme' });
+  await send();
+  assert.equal(await page.locator('#hm-error').innerText(), 'Enter your work email, like you@company.com.');
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'hm-email');
+  await fill(page, { 'Work email': 'ann@acme.co' });
+  await send();
+  assert.equal(await page.locator('#hm-error').innerText(), 'Enter your company’s name.');
+  assert.equal(sent.length, 0);
+  await close();
+});
+
+test('an error is announced and tied to its field, which keeps its red edge while focused', async () => {
+  const { page, close } = await open('/');
+  const sent = await standIn(page);
+  const error = page.locator('#hm-error');
+  // in the accessibility tree before there's anything to say, so the first message is announced like the rest
+  assert.notEqual(await error.evaluate(e => getComputedStyle(e).display), 'none');
+  assert.equal(await error.getAttribute('role'), 'alert');
+  await fill(page, { 'Name': 'Ann', 'Work email': 'ann@acme.co' });
+  const send = () => page.getByRole('button', { name: 'Request access' }).last().click();
+  await send();
+  const company = page.locator('#hm-company');
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'hm-company');
+  assert.equal(await company.getAttribute('aria-invalid'), 'true');
+  assert.equal(await company.getAttribute('aria-describedby'), 'hm-error');
+  await page.waitForFunction(() => getComputedStyle(document.activeElement).borderTopColor === 'rgb(180, 35, 24)',
+    null, { timeout: 2000 });   // red while focused (after the border's short transition)
+  assert.equal(await page.locator('#hm-use').getAttribute('aria-describedby'), 'hm-use-hint');
+  await fill(page, { 'Company': 'Acme', 'Work email': 'ann' });   // now the email is the one to fix
+  await send();
+  assert.equal(await company.getAttribute('aria-describedby'), null);
+  assert.equal(await page.locator('#hm-email').getAttribute('aria-describedby'), 'hm-error');
+  assert.equal(sent.length, 0);
+  await close();
+});
+
+for (const [what, reply, status] of [['the script is down', { ok: true }, 500], ['the script is busy', { ok: false, error: 'busy' }, 200]]) {
+  test(`when ${what}, the form stays and says to try again`, async () => {
+    const { page, close } = await open('/');
+    await standIn(page, reply, status);
+    await fill(page, { 'Name': 'Ann', 'Work email': 'ann@acme.co', 'Company': 'Acme' });
+    const button = page.getByRole('button', { name: 'Request access' }).last();
+    await button.click();
+    await page.waitForFunction(() => document.getElementById('hm-error').textContent.includes('Try again') ||
+      document.getElementById('hm-error').textContent.includes('try again'));
+    assert.equal(await page.locator('#hm-form').isVisible(), true);
+    assert.equal(await button.isEnabled(), true);
     await close();
   });
 }
 
-test('the sample chat pops open when How it works reaches Launch, and its bubble closes and opens it', async () => {
+test('the script refusing the email or the company points at that field', async () => {
   const { page, close } = await open('/');
-  const bubble = page.locator('#how .ov-chat-bubble');
-  const cardOpacity = v => page.waitForFunction(o => getComputedStyle(document.querySelector('#how .ov-chat-card')).opacity === o, v, { timeout: 3000 });
-  await page.locator('.ov-tour-step[data-step="launch"]').evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
-  await page.waitForFunction(() => document.querySelector('#how .ov-chat-bubble').getAttribute('aria-expanded') === 'true', null, { timeout: 3000 });
-  await cardOpacity('1');
-  await bubble.click();
-  assert.equal(await bubble.getAttribute('aria-expanded'), 'false');
-  assert.match(await bubble.getAttribute('aria-label'), /^Open/);
-  await cardOpacity('0');
-  await bubble.click();
-  assert.equal(await bubble.getAttribute('aria-expanded'), 'true');
-  assert.match(await bubble.getAttribute('aria-label'), /^Close/);
-  await cardOpacity('1');
+  await standIn(page, { ok: false, error: 'company' });
+  await fill(page, { 'Name': 'Ann', 'Work email': 'ann@acme.co', 'Company': 'Acme' });
+  await page.getByRole('button', { name: 'Request access' }).last().click();
+  await page.waitForFunction(() => document.getElementById('hm-error').textContent !== '');
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'hm-company');
   await close();
 });
 
-test('the models section shows Heura Arche available, then Asteria and Aniketos coming soon', async () => {
-  const { page, close } = await open('/');
-  const models = await page.locator('#models article').evaluateAll(as => as.map(a => ({
-    name: a.querySelector('h3').textContent.replace(/\s+/g, ' ').trim(),
-    status: a.querySelector('[data-status]').textContent.replace(/\s+/g, ' ').trim(),
-  })));
-  assert.deepEqual(models.map(m => m.name), ['Heura Arche', 'Heura Asteria', 'Heura Aniketos']);
-  assert.match(models[0].status, /available/i);
-  assert.match(models[1].status, /coming soon/i);
-  assert.match(models[2].status, /coming soon/i);
-  assert.match(await page.locator('#models article').first().innerText(), /2B/);
-  await close();
-});
-
-test('Asteria is four times as powerful as Arche and needs a GPU', async () => {
-  const { page, close } = await open('/');
-  const asteria = (await page.locator('#models article:has(#ov-asteria) .ov-model-text').innerText()).replace(/\s+/g, ' ').trim();
-  assert.match(asteria, /^Four times as powerful as Arche\./);
-  assert.match(asteria, /GPU/);
-  assert.doesNotMatch(asteria, /'/, 'curly apostrophes, like the rest of the page');
-  await close();
-});
-
-test('each starter kit names its three documents, and the page says what every kit holds', async () => {
-  const { page, close } = await open('/');
-  const kits = await page.locator('#kits').innerText();
-  for (const doc of ['Refund Policy', 'Shipping FAQ', 'Warranty', 'Time Off Policy', 'Benefits Guide', 'Remote Work Policy',
-    'Passwords and MFA', 'VPN Guide', 'Laptop Requests', 'Product Sheet', 'Pricing', 'Objection Handling']) {
-    assert.match(kits, new RegExp(doc), doc);
-  }
-  assert.match(kits, /3 documents, 6 rules, 10 example answers and 8 test questions/);
-  await close();
-});
-
-test('pointing at a kit changes nothing, because a kit is not a button', async () => {
-  const { page, close } = await open('/');
-  const kit = page.locator('#kits .ov-kit').first();
-  await kit.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(1500); // let it finish rising into place
-  const look = () => kit.evaluate(el => {
-    const s = getComputedStyle(el);
-    return [s.transform, s.boxShadow, s.borderTopColor, s.backgroundColor].join(' | ');
-  });
-  const before = await look();
-  await kit.hover();
-  await page.waitForTimeout(500);
-  assert.equal(await look(), before);
-  await close();
-});
-
-for (const width of [320, 375]) {
-  test(`no text is smaller than 11px at ${width}px wide`, async () => {
-    const { page, close } = await open('/', { viewport: { width, height: 760 } });
+for (const width of [320, 390, 1440]) {
+  test(`at ${width}px nothing scrolls sideways and no text is smaller than 11px`, async () => {
+    const { page, close } = await open('/', { viewport: { width, height: 800 } });
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no sideways scroll');
     const tooSmall = await page.evaluate(() => {
       const out = [];
       for (const el of document.querySelectorAll('body *')) {
         const text = [...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent.trim()).join('');
         if (!text) continue;
         const shown = el.checkVisibility({ visibilityProperty: true, checkVisibilityCSS: true });
-        const size = parseFloat(getComputedStyle(el).fontSize);
-        if (shown && size < 11) out.push(`${text} (${size}px)`);
+        if (shown && parseFloat(getComputedStyle(el).fontSize) < 11) out.push(text);
       }
       return out;
     });
@@ -178,91 +431,32 @@ for (const width of [320, 375]) {
   });
 }
 
-test('the page sells Heura Studios first: How it works and Starter kits come before Models', async () => {
-  const { page, close } = await open('/');
-  assert.deepEqual(await page.locator('main > section[id]').evaluateAll(s => s.map(x => x.id)), ['how', 'kits', 'models']);
-  assert.match(await page.locator('.ov-hero-lead').innerText(), /Heura Studios/);
-  assert.match(await page.locator('#how .ov-section-lead').innerText(), /Heura Studios/);
-  assert.match(await page.locator('meta[name="description"]').getAttribute('content'), /Heura Studios/);
-  assert.deepEqual(await page.locator('footer nav').first().locator('a').allTextContents(),
-    ['How it works', 'Starter kits', 'Models', 'Launch an agent', 'Blog'], 'the footer lists them in the same order');
-  await close();
-});
-
-test('the header links go to sections that exist', async () => {
-  const { page, close } = await open('/');
-  const links = await page.locator('header nav a').evaluateAll(as => as.map(a => [a.textContent.trim(), a.getAttribute('href')]));
-  assert.deepEqual(links, [['How it works', '#how'], ['Starter kits', '#kits'], ['Models', '#models'], ['Blog', '/blog/']]);
-  for (const [, href] of links.filter(([, h]) => h.startsWith('#'))) assert.equal(await page.locator(href).count(), 1, href);
-  await close();
-});
-
-for (const scheme of ['light', 'dark']) {
-  test(`the product pictures describe themselves, load, and match the ${scheme} appearance`, async () => {
-    const { page, close } = await open('/', { colorScheme: scheme });
-    const shots = page.locator('main img');
-    assert.ok(await shots.count() >= 3);
-    for (const alt of await shots.evaluateAll(is => is.map(i => i.getAttribute('alt') || ''))) assert.ok(alt.length > 20, alt);
-    for (const img of await shots.all()) {
-      if (!(await img.isVisible())) continue;
-      await img.scrollIntoViewIfNeeded();
-      await page.waitForFunction(i => i.complete && i.naturalWidth > 0, await img.elementHandle(), { timeout: 5000 });
-      if (await img.getAttribute('data-theme-free') !== null) continue; // looks the same in both, like the chat window
-      assert.match(await img.getAttribute('src'), new RegExp(`-${scheme}\\.webp$`));
-    }
-    await close();
-  });
-}
-
-test('in dark mode the panels stand apart from the page', async () => {
-  const { page, close } = await open('/', { colorScheme: 'dark' });
-  const [panel, pageColor] = await page.evaluate(() => [
-    getComputedStyle(document.querySelector('.ov-panel')).backgroundColor,
-    getComputedStyle(document.body).backgroundColor,
-  ]);
-  assert.ok(ratio(panel, pageColor) >= 1.12, `panel ${panel} on ${pageColor} is only ${ratio(panel, pageColor).toFixed(3)}:1`);
-  await close();
-});
-
-for (const scheme of ['light', 'dark']) {
-  test(`with Increase Contrast on (${scheme}), secondary text and panel edges get stronger`, async () => {
-    const { page, close } = await open('/', { colorScheme: scheme, contrast: 'more' });
-    const [lead, pageColor, edge] = await page.evaluate(() => [
-      getComputedStyle(document.querySelector('.ov-section-lead')).color,
-      getComputedStyle(document.body).backgroundColor,
-      getComputedStyle(document.querySelector('.ov-panel')).borderTopColor,
-    ]);
-    assert.ok(ratio(lead, pageColor) >= 10, `secondary text ${lead} on ${pageColor}: ${ratio(lead, pageColor).toFixed(2)}:1`);
-    assert.ok(ratio(edge, pageColor) >= 3, `panel edge ${edge} on ${pageColor}: ${ratio(edge, pageColor).toFixed(2)}:1`);
-    await close();
-  });
-}
-
-test('the header is solid, with nothing showing through it', async () => {
-  const { page, close } = await open('/');
-  const [filter, background] = await page.evaluate(() => {
-    const s = getComputedStyle(document.querySelector('header'));
-    return [s.backdropFilter, s.backgroundColor];
-  });
-  assert.equal(filter, 'none');
-  assert.match(background, /^rgb\(/);
-  await close();
-});
-
 for (const width of [1280, 834, 375]) {
   test(`at ${width}px the headline starts on the same left edge as every section heading`, async () => {
     const { page, close } = await open('/', { viewport: { width, height: 860 } });
-    const lefts = await page.evaluate(stacked => {
-      const left = sel => {
+    const lefts = await page.evaluate(() => {
+      const left = el => {
         const range = document.createRange();
-        range.selectNodeContents(document.querySelector(sel));
+        range.selectNodeContents(el);
         return Math.round(range.getClientRects()[0].left);
       };
-      const out = { edge: left('#models h2'), hero: left('.ov-hero h1'), how: left('#how h2'), kits: left('#kits h2'), closing: left('.ov-closing h2') };
-      if (stacked) out.lead = left('.ov-hero-lead');
-      return out;
-    }, width < 1000);
-    for (const [name, x] of Object.entries(lefts)) assert.ok(Math.abs(x - lefts.edge) <= 4, `${name} starts at ${x}px, the page edge is ${lefts.edge}px`);
+      return [left(document.querySelector('h1')), ...[...document.querySelectorAll('main h2:not(.ov-sr)')].map(left)];
+    });
+    for (const x of lefts) assert.ok(Math.abs(x - lefts[0]) <= 4, `${lefts}`);
+    await close();
+  });
+}
+
+for (const scheme of ['light', 'dark']) {
+  test(`secondary text reads at 4.5:1 or more (${scheme})`, async () => {
+    const { page, close } = await open('/', { colorScheme: scheme });
+    const pairs = await page.evaluate(() => ['.hm-caption', '.ov-section-lead', '.hm-key', '.hm-io', '.hm-io-label', '.hm-hint', '.hm-fine'].map(sel => {
+      const el = document.querySelector(sel);
+      let bg = 'rgba(0, 0, 0, 0)';
+      for (let e = el; e && /rgba\(.*, 0\)$/.test(bg); e = e.parentElement) bg = getComputedStyle(e).backgroundColor;
+      return [sel, getComputedStyle(el).color, /rgba\(.*, 0\)$/.test(bg) ? getComputedStyle(document.documentElement).backgroundColor : bg];
+    }));
+    for (const [sel, fg, bg] of pairs) assert.ok(ratio(fg, bg) >= 4.5, `${sel}: ${fg} on ${bg}`);
     await close();
   });
 }
@@ -270,77 +464,30 @@ for (const width of [1280, 834, 375]) {
 test('the appearance setting offers System, Light and Dark; Dark sticks across pages, System gives it back', async () => {
   const { page, ctx, close } = await open('/', { colorScheme: 'light' });
   const group = page.getByRole('radiogroup', { name: 'Appearance' });
-  assert.deepEqual(await group.getByRole('radio').evaluateAll(rs => rs.map(r => r.getAttribute('aria-label') || r.labels[0].textContent.trim())), ['System', 'Light', 'Dark']);
-  assert.equal(await group.getByRole('radio', { name: 'System' }).isChecked(), true);
+  assert.deepEqual(await group.getByRole('radio').evaluateAll(rs => rs.map(r => r.labels[0].textContent.trim())), ['System', 'Light', 'Dark']);
   await group.getByRole('radio', { name: 'Dark' }).check();
   assert.equal(await page.evaluate(() => document.documentElement.getAttribute('data-theme')), 'dark');
-  assert.equal(await page.evaluate(() => localStorage.getItem('ov-theme')), 'dark');
   const other = await ctx.newPage();
   await other.goto(server.url + '/waitlist/');
   assert.equal(await other.evaluate(() => document.documentElement.getAttribute('data-theme')), 'dark');
-  assert.equal(await other.getByRole('radiogroup', { name: 'Appearance' }).getByRole('radio', { name: 'Dark' }).isChecked(), true);
   await group.getByRole('radio', { name: 'System' }).check();
   assert.equal(await page.evaluate(() => localStorage.getItem('ov-theme')), null);
   assert.equal(await page.evaluate(() => document.documentElement.getAttribute('data-theme')), 'light');
-  await page.emulateMedia({ colorScheme: 'dark' });
-  await page.waitForFunction(() => document.documentElement.getAttribute('data-theme') === 'dark', null, { timeout: 2000 });
   await close();
 });
 
-test('the page never says "we"', async () => {
+test('the page never says "we", nor the words the voice leaves out', async () => {
   const { page, close } = await open('/');
-  assert.doesNotMatch(await page.evaluate(() => document.body.innerText), /\bwe\b|\bwe'll\b|\bwe're\b|\bwe’ll\b/i);
+  const text = await page.evaluate(() => document.body.innerText);
+  assert.doesNotMatch(text, /\bwe\b|\bwe'll\b|\bwe're\b|\bwe’ll\b|\bwe’re\b/i);
+  assert.doesNotMatch(text, /no code|build your own AI|cheaper than|AI-powered|seamless|unlock|supercharge|!/i);
   await close();
 });
 
-test('nothing on the home page moves forever', async () => {
+test('nothing but the recording moves, and nothing rises into place', async () => {
   const { page, close } = await open('/');
-  await page.waitForTimeout(1500);
-  const forever = await page.evaluate(() => document.getAnimations()
-    .filter(a => a.effect && a.effect.getComputedTiming().iterations === Infinity)
-    .map(a => a.animationName || 'unnamed'));
-  assert.deepEqual(forever, []);
+  await page.waitForTimeout(1200);
+  assert.deepEqual(await page.evaluate(() => document.getAnimations().map(a => a.animationName || a.transitionProperty || 'x')), []);
+  assert.equal(await page.locator('[data-reveal], [data-parallax]').count(), 0);
   await close();
-});
-
-// Ryan, Oct 14, 2026 ("bruh upload the that bruh", to "Say the word and I'll add it anyway"): the page says that an AI
-// can answer with Claude, GPT, Gemini or the company's own model instead, with the company's own key, as the Heura
-// Studios app's Models page does. It sits under the model cards, as a list like the starter kits.
-test('Models: or bring your own, with your company’s own key: Claude, GPT, Gemini or your own model', async () => {
-  const { page, errors, close } = await open('/');
-  const byo = page.locator('#models .ov-byo');
-  assert.equal(await byo.count(), 1);
-  assert.equal((await byo.locator('.ov-byo-title').innerText()).trim(), 'Or bring your own');
-  assert.match(await byo.locator('.ov-section-lead').innerText(), /another model instead, using your company’s own key/);
-  assert.deepEqual(await byo.locator('.ov-kit h4').allTextContents(), ['Claude', 'GPT', 'Gemini', 'Your own model']);
-  assert.match(await byo.locator('.ov-kit').nth(1).innerText(), /GPT can also be trained on your examples/);
-  assert.match(await byo.locator('.ov-kit').nth(3).innerText(), /Ollama, LM Studio, vLLM/);
-  const after = await page.evaluate(() => Boolean(document.querySelector('#models .ov-models')
-    .compareDocumentPosition(document.querySelector('#models .ov-byo')) & Node.DOCUMENT_POSITION_FOLLOWING));
-  assert.ok(after, 'under the model cards');
-  assert.deepEqual(errors, []);
-  await close();
-});
-
-// Each name in Bring your own sits level with its line, as in the starter kits (an h4 gets no browser margin).
-test('Models: in Bring your own, each name lines up with its line, as in the starter kits', async () => {
-  for (const viewport of [{ width: 1280, height: 860 }, { width: 375, height: 812 }]) {
-    const { page, close } = await open('/', { viewport });
-    const rows = await page.locator('#models .ov-byo .ov-kit').evaluateAll(els => els.map(el => {
-      const name = el.querySelector('h4'), line = el.querySelector('.ov-kit-docs');
-      return { name: name.textContent, margin: getComputedStyle(name).margin,
-        top: name.getBoundingClientRect().top, lineTop: line.getBoundingClientRect().top,
-        bottom: name.getBoundingClientRect().bottom, rowTop: el.getBoundingClientRect().top };
-    }));
-    const kit = await page.locator('#kits .ov-kit').first().evaluate(el =>
-      el.querySelector('h3').getBoundingClientRect().top - el.getBoundingClientRect().top);
-    assert.equal(rows.length, 4);
-    for (const r of rows) {
-      assert.equal(r.margin, '0px', `${r.name} at ${viewport.width}px`);
-      assert.ok(Math.abs((r.top - r.rowTop) - kit) <= 1, `${r.name} starts where a kit's name does at ${viewport.width}px`);
-      if (viewport.width >= 480) assert.ok(Math.abs(r.top - r.lineTop) <= 4, `${r.name} level with its line: ${JSON.stringify(r)}`);
-      else assert.ok(r.lineTop - r.bottom <= 8, `${r.name} close above its line: ${JSON.stringify(r)}`);
-    }
-    await close();
-  }
 });

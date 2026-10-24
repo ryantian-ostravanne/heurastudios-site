@@ -11,6 +11,7 @@ const ROOT = path.resolve(__dirname, '..');
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.png': 'image/png',
   '.ico': 'image/x-icon', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.pdf': 'application/pdf',
+  '.webm': 'video/webm', '.mp4': 'video/mp4',
 };
 
 function startServer(root = ROOT) {

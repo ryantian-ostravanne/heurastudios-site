@@ -35,24 +35,42 @@ async function fill(page, email, company) {
   await page.getByRole('button', { name: 'Join waitlist' }).click();
 }
 
-// Launch (Ryan, Oct 14, 2026): the app is open to anyone at app.heurastudios.com, so every call to action signs up there,
-// on the home page and both legal pages. The waitlist page stays for anyone who follows an old link.
-// Oct 19, 2026 (Ryan: "instead of get started use like Launch an agent"): the calls to action say Launch an agent. And
-// Log in is behind it ("remove the login on the main page and only have the option when i click Launch an Agent"): the
-// sign-up page it opens says Already have an account? Log in.
+// Launch (Ryan, Oct 14, 2026): the app opened to anyone at app.heurastudios.com, and every call to action signed up
+// there. Oct 19 (Ryan: "remove the login on the main page and only have the option when i click Launch an Agent"): no
+// Log in on the public pages; it was behind the call to action. Oct 24 (the post-training positioning): access is for
+// teams under contract, so every call to action is Request access, the form on the home page, and Log in is beside
+// that form (the home page's test checks it), still not in a header or a footer. The waitlist page stays for anyone
+// who follows an old link.
 const APP = 'https://app.heurastudios.com';
-test('every call to action is Launch an agent at app.heurastudios.com, and Log in is behind it', async () => {
+test('every call to action is Request access, and no header or footer has Log in', async () => {
   for (const path of ['/', '/privacy/', '/terms/']) {
     const { page, errors, close } = await open(path);
-    const starts = page.getByRole('link', { name: 'Launch an agent' });
-    assert.ok(await starts.count() >= (path === '/' ? 4 : 2), `${path}: header, hero and the closing band; the footer`);
-    for (const href of await starts.evaluateAll(as => as.map(a => a.getAttribute('href')))) assert.equal(href, `${APP}/signup`, path);
-    assert.equal(await page.getByRole('link', { name: 'Log in' }).count(), 0, `${path}: no Log in`);
-    assert.equal(await page.locator(`a[href^="${APP}/login"]`).count(), 0, path);
-    assert.equal(await page.getByRole('link', { name: 'Join waitlist' }).count(), 0, `${path}: no waitlist buttons`);
-    assert.equal(await page.getByRole('link', { name: 'Get started' }).count(), 0, `${path}: no Get started left`);
+    const asks = page.getByRole('link', { name: 'Request access' });
+    assert.ok(await asks.count() >= 2, `${path}: the header and the footer`);
+    for (const href of await asks.evaluateAll(as => as.map(a => a.getAttribute('href')))) {
+      assert.ok(href === '/#request' || (path === '/' && href === '#request'), `${path}: ${href}`);
+    }
+    assert.equal(await page.locator('header, footer').locator(`a[href^="${APP}/login"]`).count(), 0, `${path}: no Log in`);
+    assert.equal(await page.locator(`a[href^="${APP}/login"]`).count(), path === '/' ? 1 : 0, `${path}: Log in only beside the form`);
+    assert.equal(await page.locator(`a[href^="${APP}/signup"]`).count(), 0, `${path}: no open sign-up`);
+    for (const old of ['Get started', 'Launch an agent', 'Sign in', 'Join waitlist']) {
+      assert.equal(await page.getByRole('link', { name: old }).count(), 0, `${path}: no ${old}`);
+    }
     const text = await page.evaluate(() => document.body.innerText);
     if (path === '/') assert.doesNotMatch(text, /early access|store/i, path);   // the home page's copy; the legal text says both
+    assert.deepEqual(errors, [], path);
+    await close();
+  }
+});
+
+// Every page shares one card (og-image.png: the headline beside a frame of the recording), so every page describes
+// that card, not the one before it (Oct 24, 2026).
+test('every page describes the share card it shows: the headline and a model’s pipeline', async () => {
+  for (const path of ['/', '/privacy/', '/terms/', '/waitlist/']) {
+    const { page, errors, close } = await open(path);
+    assert.equal(await page.locator('meta[property="og:image"]').getAttribute('content'), 'https://heurastudios.com/og-image.png', path);
+    assert.equal(await page.locator('meta[property="og:image:alt"]').getAttribute('content'),
+      'Heura Studios. Specialize the base before you ship the agent. Beside it, a model’s pipeline in Heura Studios.', path);
     assert.deepEqual(errors, [], path);
     await close();
   }

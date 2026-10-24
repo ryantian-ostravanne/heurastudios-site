@@ -1,6 +1,6 @@
-// The header (Ryan, Oct 19, 2026: "instead of get started use like Launch an agent"): the longer button still fits every
-// width. And no prices on the public pages (Ryan, 20:47: "remove the pricing thing on the main page, only have it on the
-// actual product page after the login"): the plans are on the Plan page in Heura Studios.
+// The header: one button, at the right, that fits every width (Ryan, Oct 19, 2026; since Oct 24 it says Request access).
+// And no prices on the public pages (Ryan, Oct 19, 20:47: "remove the pricing thing on the main page, only have it on
+// the actual product page after the login"): the plans are on the Plan page in Heura Studios.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { startServer, launch } = require('./helpers');
@@ -29,11 +29,11 @@ test('no prices on the public pages: the plans are in Heura Studios, after loggi
   }
 });
 
-// The header: the logo, the four sections (from 880px) and the button, at the right. Under 480px the button says Launch,
-// and screen readers still hear Launch an agent. No Log in (Ryan, Oct 19: it's behind Launch an agent).
+// The header: the logo, the two sections (from 760px) and the button, at the right. No Log in (Ryan, Oct 19: not on the
+// public pages; it's beside the Request access form on the home page).
 for (const path of ['/', '/privacy/', '/terms/']) {
-  test(`${path}: the header fits from 320px to 1280px, its button Launch an agent (Launch on a phone)`, async () => {
-    for (const width of [320, 360, 375, 390, 414, 420, 479, 480, 520, 600, 760, 834, 879, 880, 960, 1024, 1280]) {
+  test(`${path}: the header fits from 320px to 1280px, its one button Request access at the right`, async () => {
+    for (const width of [320, 360, 375, 390, 414, 420, 479, 480, 520, 600, 759, 760, 834, 880, 960, 1024, 1280]) {
       const { page, close } = await open(path, { viewport: { width, height: 700 } });
       const row = await page.evaluate(() => {
         const r = document.querySelector('.ov-top-row');
@@ -49,25 +49,14 @@ for (const path of ['/', '/privacy/', '/terms/']) {
       for (const k of row.shown) assert.ok(k.left >= row.inner[0] - 0.5 && k.right <= row.inner[1] + 0.5, `${where}: ${k.what} spills out of the header`);
       for (let i = 1; i < row.shown.length; i++) assert.ok(row.shown[i].left >= row.shown[i - 1].right, `${where}: ${row.shown[i].what} overlaps ${row.shown[i - 1].what}`);
       const header = page.locator('header');
-      const button = header.getByRole('link', { name: 'Launch an agent' });
+      const button = header.getByRole('link', { name: 'Request access' });
       assert.equal(await button.count(), 1, where);
-      assert.equal(await button.getAttribute('href'), 'https://app.heurastudios.com/signup', where);
-      const { seen, space } = await button.evaluate(a => {   // the words that are drawn: the rest is clipped to a pixel on a phone
-        const more = a.querySelector('.ov-cta-more');
-        const clipped = more.getBoundingClientRect().width <= 1;
-        const range = document.createRange();   // and the space before "an agent" is drawn too (a flex item would lose it)
-        range.setStart(more.firstChild, 0);
-        range.setEnd(more.firstChild, 1);
-        return { seen: (clipped ? a.textContent.replace(more.textContent, '') : a.textContent).replace(/\s+/g, ' ').trim(),
-          space: clipped ? null : range.getBoundingClientRect().width };
-      });
-      assert.equal(seen, width < 480 ? 'Launch' : 'Launch an agent', where);
-      if (width >= 480) assert.ok(space > 2, `${where}: Launch and an agent run together (the space is ${space}px)`);
-      assert.equal(await header.getByRole('link', { name: 'Log in' }).count(), 0, `${where}: Log in`);
+      assert.equal(await button.getAttribute('href'), path === '/' ? '#request' : '/#request', where);
+      assert.equal(await header.locator('a[href*="app.heurastudios.com"]').count(), 0, `${where}: Log in`);
       const last = row.shown[row.shown.length - 1];
       assert.ok(last.what.includes('ov-btn') && Math.abs(last.right - row.inner[1]) <= 1, `${where}: the button sits at the right`);
       const nav = await header.locator('nav a').evaluateAll(as => as.filter(a => a.getBoundingClientRect().width > 0).map(a => a.textContent.trim()));
-      assert.deepEqual(nav, width >= 880 ? ['How it works', 'Starter kits', 'Models', 'Blog'] : [], where);
+      assert.deepEqual(nav, width >= 760 ? ['Tools', 'Blog'] : [], where);
       await close();
     }
   });

@@ -151,16 +151,20 @@ test('every page links to the blog from its header and its footer', async () => 
   }
 });
 
-// Launch: the blog's header and footer match every other page's, with Launch an agent at app.heurastudios.com and no Log
-// in (Ryan, Oct 19: it's behind Launch an agent).
+// The blog's header and footer match every other page's: Request access (the home page's form), and no Log in (Ryan,
+// Oct 19: not on the public pages; it's beside the form now). A post can still have its own links, like the
+// small-business post's Launch an agent.
 const APP = 'https://app.heurastudios.com';
-test('the blog has Launch an agent at app.heurastudios.com and no Log in, like every other page', async () => {
+test('the blog has Request access and no Log in, like every other page', async () => {
   for (const p of ['/blog/', POST, SMB]) {
     const { page, errors, close } = await open(p);
-    const starts = page.locator('header, footer').getByRole('link', { name: 'Launch an agent' });   // a post may have its own
-    assert.equal(await starts.count(), 2, `${p}: in the header and the footer`);
-    for (const href of await starts.evaluateAll(as => as.map(a => a.getAttribute('href')))) assert.equal(href, `${APP}/signup`, p);
-    assert.equal(await page.getByRole('link', { name: 'Log in' }).count(), 0, `${p}: no Log in`);
+    const asks = page.locator('header, footer').getByRole('link', { name: 'Request access' });
+    assert.equal(await asks.count(), 2, `${p}: in the header and the footer`);
+    for (const href of await asks.evaluateAll(as => as.map(a => a.getAttribute('href')))) assert.equal(href, '/#request', p);
+    assert.equal(await page.locator(`a[href^="${APP}/login"]`).count(), 0, `${p}: no Log in`);
+    for (const old of ['Get started', 'Launch an agent', 'Sign in']) {
+      assert.equal(await page.locator('header, footer').getByRole('link', { name: old }).count(), 0, `${p}: ${old}`);
+    }
     assert.equal(await page.getByRole('link', { name: 'Join waitlist' }).count(), 0, `${p}: no waitlist buttons`);
     assert.deepEqual(errors, [], p);
     await close();
