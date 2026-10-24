@@ -1,5 +1,6 @@
 /** @OnlyCurrentDoc */
-// Heura waitlist (heurastudios.com): Apps Script entry points. The logic lives in the "core" script file (core.js).
+// Heura waitlist and Request access (heurastudios.com): Apps Script entry points. The logic lives in the "core" script
+// file (core.js). After pasting a new version, run setup() once: it adds any header cell that's missing.
 // The script is bound to the "Heura waitlist" sheet, and @OnlyCurrentDoc keeps its permission to that one sheet.
 // Setup: run setup() once from the editor, then Deploy > New deployment > Web app (Execute as: Me, Who has
 // access: Anyone) and put the /exec URL in data-endpoint on the form in waitlist/index.html. To ship a change:
@@ -31,6 +32,9 @@ function deps_() {
     },
     append: function (row) {
       sheet.appendRow(row);
+    },
+    fill: function (i, cells) {   // row i below the header: its Name, Role and What they will specialize
+      sheet.getRange(i + 2, 5, 1, cells.length).setValues([cells]);
     },
     now: function () {
       return new Date();
@@ -79,10 +83,14 @@ function doPost(e) {
     result = { ok: false, error: 'server' };
   }
   if (p.js === '1') return json_(result);
-  return result.ok
-    ? page_("You're on the waitlist", "<h1>You're on the waitlist.</h1><p>We'll email you when the Heura Studio beta opens.</p>" +
+  if (!result.ok) {
+    return page_('Something went wrong', "<h1>That didn't go through.</h1><p>Go back, check your work email and company, and try again.</p>");
+  }
+  return p.kind === 'request'   // the home page's Request access form
+    ? page_('Request sent', '<h1>Request sent.</h1><p>A founder will reply by email.</p>' +
       '<p><a href="https://heurastudios.com">Back to heurastudios.com</a></p>')
-    : page_('Something went wrong', "<h1>That didn't go through.</h1><p>Go back, check your work email and company, and try again.</p>");
+    : page_("You're on the waitlist", "<h1>You're on the waitlist.</h1><p>We'll email you when the Heura Studio beta opens.</p>" +
+      '<p><a href="https://heurastudios.com">Back to heurastudios.com</a></p>');
 }
 
 function doGet() {
