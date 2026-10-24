@@ -1,7 +1,7 @@
 // The home page (Oct 24, 2026: the post-training positioning). The hero (the headline and the lead; Request access is
-// the header's one button), a looping recording of one run in Heura Studios with a Pause button, the eight operations in order, what it does and
-// doesn't do yet, and the Request access form, with Log in beside it for teams that have access (Ryan, Oct 19: no Log in
-// on the page itself, only where its call to action leads). Quiet on purpose: the recording is the one thing that
+// the header's one button), a looping recording of one run in Heura Studios with a Pause button (on a phone, a recording
+// of the Studio at a phone's size), Tools, Specifications, and the Request access form, with Log in beside it for teams
+// that have access (Ryan, Oct 19: no Log in on the page itself, only where its call to action leads). Quiet on purpose: the recording is the one thing that
 // moves, and it stops with Pause, with Reduce Motion, and off screen. No text under 11px, no "we".
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -151,6 +151,62 @@ for (const scheme of ['light', 'dark']) {
     await ctx.close();
   });
 }
+
+// Ryan, Oct 24, 13:54: "like even the iphone thing too". On a phone the desktop recording was a stamp: phones get a
+// recording of the Studio at a phone's size (taps and swipes, drawn at 2x), in a frame of its shape. The .mp4 comes
+// first: every iPhone decodes H.264 itself, and it's the smaller file.
+const PHONE = { width: 390, height: 844 };
+for (const scheme of ['light', 'dark']) {
+  test(`on a phone (${scheme}) it plays the phone recording, in a frame of its shape, and fetches nothing else`, async () => {
+    const ctx = await browser.newContext({ viewport: PHONE, colorScheme: scheme, isMobile: true, hasTouch: true });
+    const page = await ctx.newPage();
+    const fetched = [];
+    page.on('request', r => { if (/\/img\/pipeline-run/.test(r.url())) fetched.push(new URL(r.url()).pathname); });
+    await page.goto(server.url + '/');
+    await page.waitForFunction(() => !document.querySelector('.hm-video').paused);
+    const own = scheme === 'dark' ? /\/img\/pipeline-run-phone-dark\./ : /\/img\/pipeline-run-phone\./;
+    assert.match(await page.locator('.hm-video').evaluate(v => v.currentSrc), own);
+    assert.match(await page.locator('.hm-video').getAttribute('poster'), own);
+    assert.match(await page.locator('.hm-frame').evaluate(f => getComputedStyle(f).backgroundImage), own);
+    const [w, h] = await page.locator('.hm-frame').evaluate(f => [f.clientWidth, f.clientHeight]);
+    assert.ok(Math.abs(w / h - 390 / 600) < 0.01, `the frame has the phone recording's shape (${w} x ${h})`);
+    assert.ok(fetched.length > 0);
+    for (const path of fetched) assert.match(path, own, `${scheme}: fetched ${path}`);
+    await ctx.close();
+  });
+}
+
+test('the recording is offered as an .mp4 first, the phone one to phones, even without JavaScript', async () => {
+  const { page, close } = await open('/', { javaScriptEnabled: false });
+  const sources = await page.locator('.hm-video source').evaluateAll(ss => ss.map(s => [s.getAttribute('media'), s.type,
+    s.getAttribute('src')]));
+  assert.deepEqual(sources, [
+    ['(max-width: 599px)', 'video/mp4', '/img/pipeline-run-phone.mp4'],
+    ['(max-width: 599px)', 'video/webm', '/img/pipeline-run-phone.webm'],
+    [null, 'video/mp4', '/img/pipeline-run.mp4'],
+    [null, 'video/webm', '/img/pipeline-run.webm'],
+  ]);
+  await close();
+  for (const scheme of ['light', 'dark']) {   // and the frame shows the phone poster on a phone
+    const phone = await open('/', { javaScriptEnabled: false, colorScheme: scheme, viewport: PHONE });
+    assert.match(await phone.page.locator('.hm-frame').evaluate(f => getComputedStyle(f).backgroundImage),
+      scheme === 'dark' ? /pipeline-run-phone-dark\.webp/ : /pipeline-run-phone\.webp/, scheme);
+    await phone.close();
+  }
+});
+
+test('turning a phone to a wider screen changes to the desktop recording, and back', async () => {
+  const ctx = await browser.newContext({ viewport: PHONE, isMobile: true, hasTouch: true });
+  const page = await ctx.newPage();
+  await page.goto(server.url + '/');
+  await page.waitForFunction(() => /pipeline-run-phone\./.test(document.querySelector('.hm-video').currentSrc));
+  await page.setViewportSize({ width: 1024, height: 700 });
+  await page.waitForFunction(() => /\/pipeline-run\.(mp4|webm)$/.test(document.querySelector('.hm-video').currentSrc));
+  assert.match(await page.locator('.hm-video').getAttribute('poster'), /\/pipeline-run\.webp$/);
+  await page.setViewportSize(PHONE);
+  await page.waitForFunction(() => /pipeline-run-phone\./.test(document.querySelector('.hm-video').currentSrc));
+  await ctx.close();
+});
 
 test('without JavaScript the frame still shows the poster for the system’s appearance', async () => {
   for (const scheme of ['light', 'dark']) {
