@@ -1,27 +1,34 @@
 # heurastudios.com
 
-The Heura Studios waitlist site: the home page (every call to action is "Join waitlist") and `/waitlist/`, which
-saves a work email and a company name to the "Heura waitlist" Google Sheet in Ryan's ostravanne.com Drive.
+The Heura Studios site: the home page (post-training for AI-native companies; every call to action is Request access,
+and Log in, for teams that have access, is beside its form, not in a header or footer), the blog, the legal pages, and
+`/waitlist/` for anyone with an old link.
 
-- `index.html`, `site.css`, `site.js`: the home page. `site.css` and `site.js` are shared by both pages: the
-  header, the Appearance setting in the footer, things rising into place as they scroll in (not with Reduce
-  Motion), the How it works tour (a stage that stays in view and shows each step's screen) and the sample chat
-  whose bubble opens and closes it.
-- `img/`: real Heura Studios screens (retaken Oct 13, 2026 in the Studio's console look, from a throwaway Studio in
-  public mode with the stand-in model, so nothing the model says is shown), made with a sample AI for a made-up shop ("Fernbrook Supply Co."), one per
-  appearance (`-light.webp`, `-dark.webp`). `studio-chat-card.webp` is the chat window alone on a transparent
-  background (the same in both appearances); the site draws the bubble under it.
-- `waitlist/`: the form. Its `action` is the Apps Script web app.
+- `index.html`, `home.js`: the home page (Oct 24, 2026). The hero, a looping screen recording of one run in Heura
+  Studios (light and dark; Pause; with Reduce Motion it waits for Play; off screen it rests), the eight operations in
+  order, what it does and doesn't do yet, and the Request access form. Quiet on purpose: the recording is the one thing
+  that moves. The words follow `claude/heura-studios-positioning.md` in the Heura Studios project.
+- `site.css`, `site.js`: shared by every page: the tokens (light and dark), the header, buttons, the footer and its
+  Appearance setting, the header's rule once the page scrolls, and the waitlist page's reveals and sample chat.
+- `img/pipeline-run.*` and `img/pipeline-run-dark.*`: the recording (VP9 `.webm`, H.264 `.mp4`) and its first frame
+  (`.webp`, the poster). Recorded from the real Studio with `_tools/record-pipeline.py` (a fresh throwaway Studio with
+  the stand-in model and trainer, a sample model for a made-up shop, "Fernbrook Supply Co."), so it can be recorded
+  again: `python3 _tools/record-pipeline.py <app checkout> img` and again with `--dark`.
+- `img/studio-*.webp`: Studio screens from Oct 13 (the waitlist page's sample chat card is `studio-chat-card.webp`).
+- `waitlist/`: the old waitlist form. Its `action` is the Apps Script web app. The home page's Request access form posts
+  to the same script with `kind=request` and three more fields.
 - `privacy/`, `terms/` and `legal.css`: the Privacy Policy and the Terms of Service (Leo's text of Oct 13, 2026,
   the same words as the Heura Studios app's /privacy and /terms; the training switch reads opt-in), linked from
-  every page's footer and from the waitlist form. Their placeholders ([insert date before publishing], the
-  contact emails, the provider list...) still need filling: they went live with them on Oct 13, 2026.
-- `_backend/`: the Apps Script behind the form (`core.js` is the logic, `Code.gs` the Google side). In the Apps
-  Script project they're pasted into one file.
+  every page's footer and from the forms. Their placeholders ([insert date before publishing], the contact emails,
+  the provider list...) still need filling: they went live with them on Oct 13, 2026.
+- `_backend/`: the Apps Script behind both forms (`core.js` is the logic, `Code.gs` the Google side). In the Apps
+  Script project they're pasted into one file. The sheet's columns: Joined at, Email, Company, Came from, Name, Role,
+  What they will specialize (the last three only from Request access). After pasting a new version, run `setup()` once
+  (it adds missing header cells), then Deploy > Manage deployments > Edit > Version: New version (same /exec URL).
 - `favicon.ico`, `favicon.svg`, `favicon-32.png`, `icon-512.png`, `apple-touch-icon.png`: the logo mark (an ink
   square with Heura orange through its middle third, as in the header) for tabs, bookmarks, search results and
   home screens; the SVG turns light in dark mode like the header's. `og-image.png`: the 1200x630 card a shared
-  link shows (the logo, the headline and the Overview screen). Every page names the site Heura Studios for link
+  link shows (the logo, the headline and a frame of the recording). Every page names the site Heura Studios for link
   previews (`og:site_name`), and the home page for search results (WebSite data).
 - `CNAME`: GitHub Pages serves this repo at heurastudios.com. Pages doesn't publish `_` folders.
 - The blog (`/blog/`): GitHub Pages builds the repo with Jekyll, and only the blog uses it. Posts are Markdown in
@@ -62,5 +69,8 @@ the site keeps its last good version. Fix the file and commit again.
 
 ## The sheet
 
-Columns: Joined at, Email, Company, Came from. One row per email (joining again doesn't add a row). "Came from"
-is the page's query (utm tags), the page on this site that sent them, or the other website that did.
+Columns: Joined at, Email, Company, Came from, Name, Role, What they will specialize. One row per email (asking again
+doesn't add a row; someone on the waitlist who then requests access gets the request's name, role and use on their row). "Came from" is the page's query (utm tags), the page on this site that sent them, or the other
+website that did (the home page's form sends "/"). Name, Role and What they will specialize come from Request access;
+a waitlist join leaves them blank. Until the new `core.js` and `Code.gs` are deployed, the script saves the first four
+columns of a request and drops the other three.

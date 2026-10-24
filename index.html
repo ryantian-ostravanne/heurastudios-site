@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Heura Studios</title>
-<meta name="description" content="Build your company's own AI. No code. Heura Studios turns the documents you already have into an assistant for your customers or your team.">
+<title>Post-training for AI-native companies – Heura Studios</title>
+<meta name="description" content="Post-training for AI-native companies. Your team’s demonstrations and corrections train LoRA checkpoints. Each is scored on your eval set, and any that scores below the live one is held back.">
 <meta name="theme-color" content="#ffffff" data-light="#ffffff" data-dark="#000000">
 <!-- Set before anything paints: the appearance (the one picked under Appearance at the foot of the page, else the
-     system's), and ov-motion when things may move as they come into view (not with Reduce Motion). -->
-<script>(function(d){var t,m,w=window;try{t=localStorage.getItem('ov-theme')}catch(e){}if(t!=='light'&&t!=='dark')t=w.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';d.setAttribute('data-theme',t);d.classList.add('ov-js');if(w.matchMedia&&matchMedia('(prefers-reduced-motion: no-preference)').matches&&'IntersectionObserver'in w)d.classList.add('ov-motion');m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',m.getAttribute('data-'+t))})(document.documentElement)</script>
+     system's). -->
+<script>(function(d){var t,m,w=window;try{t=localStorage.getItem('ov-theme')}catch(e){}if(t!=='light'&&t!=='dark')t=w.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';d.setAttribute('data-theme',t);d.classList.add('ov-js');m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',m.getAttribute('data-'+t))})(document.documentElement)</script>
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
@@ -18,14 +18,14 @@
 <meta property="og:site_name" content="Heura Studios">
 <meta property="og:url" content="https://heurastudios.com/">
 <meta property="og:title" content="Heura Studios">
-<meta property="og:description" content="Build your company's own AI. No code.">
+<meta property="og:description" content="Specialize the base before you ship the agent.">
 <meta property="og:image" content="https://heurastudios.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Heura Studios. Build your company’s own AI. No code. Beside it, the Overview screen in Heura Studios.">
+<meta property="og:image:alt" content="Heura Studios. Specialize the base before you ship the agent. Beside it, a model’s pipeline in Heura Studios.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Heura Studios">
-<meta name="twitter:description" content="Build your company's own AI. No code.">
+<meta name="twitter:description" content="Specialize the base before you ship the agent.">
 <meta name="twitter:image" content="https://heurastudios.com/og-image.png">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Heura Studios","alternateName":"heurastudios.com","url":"https://heurastudios.com/"}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,218 +33,153 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cantarell:ital,wght@0,400;0,700;1,400;1,700&display=swap">
 <link rel="stylesheet" href="/site.css">
 <script src="/site.js" defer></script>
+<script src="/home.js" defer></script>
 </head>
 <body>
+<a class="ov-skip" href="#main">Skip to content</a>
 <header class="ov-top">
   <div class="ov-wrap ov-top-row">
     <a class="ov-logo" href="/"><span class="ov-mark" aria-hidden="true"></span>Heura Studios</a>
     <nav class="ov-nav" aria-label="Sections">
-      <a href="#how">How it works</a>
-      <a href="#kits">Starter kits</a>
-      <a href="#models">Models</a>
+      <a href="#sequence">The sequence</a>
       <a href="/blog/">Blog</a>
     </nav>
-    <a class="ov-btn ov-btn-primary ov-btn-small" href="https://app.heurastudios.com/signup"><span>Launch<span class="ov-cta-more"> an agent</span></span></a>
+    <a class="ov-btn ov-btn-primary ov-btn-small" href="#request">Request access</a>
   </div>
 </header>
 
-<main>
-  <!-- The hero. With motion on (site.js), it opens like the share card: the headline on the left and the screen on the
-       right, running off the window's edge; then, while the runway scrolls by, the stage holds still as the screen
-       comes to the middle and the lead and the buttons come in where it was. Laid out as it is here otherwise. -->
-  <section class="ov-hero" aria-labelledby="ov-hero-title">
-    <div class="ov-wrap ov-hero-stage">
-      <div class="ov-intro">
-        <h1 id="ov-hero-title" class="ov-display"><span class="ov-line" data-reveal>Build your company’s own AI.</span> <span class="ov-line ov-hero-line" data-reveal style="--d:.12s">No code.</span></h1>
-        <div class="ov-intro-side">
-          <p class="ov-lead ov-hero-lead" data-reveal style="--d:.24s">Heura Studios turns the documents, rules and answers you already have into an assistant for your customers or your team. Teach it, test it, then put it on your website.</p>
-          <div class="ov-actions" data-reveal style="--d:.34s">
-            <a class="ov-btn ov-btn-primary" href="https://app.heurastudios.com/signup">Launch an agent</a>
-            <a class="ov-btn ov-btn-quiet" href="#how">See how it works</a>
-          </div>
-        </div>
-      </div>
-      <!-- Real Heura Studios screens, made with a sample AI for a made-up shop. One for each appearance. The screen
-           rises out of its panel once on load (and, without the scene, drifts a little as the page scrolls). -->
-      <div class="ov-panel ov-shot" data-reveal="window" style="--d:.3s">
-        <div class="ov-shot-img" data-parallax>
-          <img class="ov-for-light" src="/img/studio-overview-light.webp" width="2000" height="1250" loading="lazy" decoding="async"
-            alt="The Overview tab in Heura Studios for Fernbrook Support, a sample AI for a made-up shop: its numbers, a checklist that shows it’s been taught 3 documents, 6 instructions and 10 examples and that trying it comes next, and its recent activity.">
-          <img class="ov-for-dark" src="/img/studio-overview-dark.webp" width="2000" height="1250" loading="lazy" decoding="async"
-            alt="The Overview tab in Heura Studios for Fernbrook Support, a sample AI for a made-up shop: its numbers, a checklist that shows it’s been taught 3 documents, 6 instructions and 10 examples and that trying it comes next, and its recent activity.">
-        </div>
+<main id="main">
+  <section class="hm-hero" aria-labelledby="hm-title">
+    <div class="ov-wrap hm-hero-row">
+      <h1 id="hm-title" class="ov-display hm-title">Specialize the base before you ship the agent.</h1>
+      <div class="hm-hero-side">
+        <p class="ov-lead">Your team’s demonstrations and corrections train LoRA checkpoints. Each is scored on your eval set, and any that scores below the live one is held back.</p>
       </div>
     </div>
-    <div class="ov-hero-runway" aria-hidden="true"></div>
   </section>
 
-  <section class="ov-section" id="how" aria-labelledby="ov-how-title">
+  <!-- The recording: one run on a sample model, recorded from the real Heura Studios with a script (_tools/). It
+       loops, muted, without the browser's controls, while it's on screen, in the file made for the appearance in use
+       (home.js); Pause stops it. With Reduce Motion it waits on its first frame until Play; without JavaScript the
+       browser's own controls show and nothing plays by itself. Its first frame is the frame's background (site.css),
+       picked by the appearance before the page paints, so a dark page never fetches the light one. -->
+  <section class="hm-run" aria-labelledby="hm-run-title">
     <div class="ov-wrap">
-      <div class="ov-head">
-        <h2 id="ov-how-title" class="ov-h2" data-reveal>How it works</h2>
-        <p class="ov-section-lead" data-reveal style="--d:.08s">Everything happens in Heura Studios, from your first document to a chat on your website. No setup, no code.</p>
-      </div>
-      <div class="ov-tour">
-        <!-- The stage: one Heura Studios screen per step. It stays in view while the steps scroll by, and site.js shows
-             the screen of the step that's level with it. Without JavaScript it shows the first. -->
-        <div class="ov-tour-stage">
-          <div class="ov-panel ov-shot ov-tour-shot is-active" data-step="pick">
-            <div class="ov-shot-img">
-              <img class="ov-for-light" src="/img/studio-pick-light.webp" width="2000" height="1250" loading="lazy" decoding="async"
-                alt="Making a new AI in Heura Studios: picking what it starts from, with Heura Arche available and Asteria and Aniketos coming soon.">
-              <img class="ov-for-dark" src="/img/studio-pick-dark.webp" width="2000" height="1250" loading="lazy" decoding="async"
-                alt="Making a new AI in Heura Studios: picking what it starts from, with Heura Arche available and Asteria and Aniketos coming soon.">
-            </div>
-          </div>
-          <div class="ov-panel ov-shot ov-tour-shot" data-step="teach">
-            <div class="ov-shot-img">
-              <img class="ov-for-light" src="/img/studio-teach-light.webp" width="2000" height="1250" loading="lazy" decoding="async"
-                alt="The Teach tab for the sample AI, with its warranty, shipping FAQ and refund policy live.">
-              <img class="ov-for-dark" src="/img/studio-teach-dark.webp" width="2000" height="1250" loading="lazy" decoding="async"
-                alt="The Teach tab for the sample AI, with its warranty, shipping FAQ and refund policy live.">
-            </div>
-          </div>
-          <div class="ov-panel ov-shot ov-tour-shot" data-step="train">
-            <div class="ov-shot-img">
-              <img class="ov-for-light" src="/img/studio-train-light.webp" width="2000" height="1250" loading="lazy" decoding="async"
-                alt="The Train tab for the sample AI: its lesson counts, 10 example answers waiting to be trained in, and a Train now button.">
-              <img class="ov-for-dark" src="/img/studio-train-dark.webp" width="2000" height="1250" loading="lazy" decoding="async"
-                alt="The Train tab for the sample AI: its lesson counts, 10 example answers waiting to be trained in, and a Train now button.">
-            </div>
-          </div>
-          <!-- The Launch tab, and over it the chat bubble the sample AI puts on a website, as the tab's live preview
-               shows it. The chat pops open when the tour reaches Launch; the bubble opens and closes it, like the
-               real one. -->
-          <div class="ov-panel ov-shot ov-tour-shot ov-chat" data-step="launch">
-            <div class="ov-shot-img">
-              <img class="ov-for-light" src="/img/studio-launch-light.webp" width="2000" height="1250" loading="lazy" decoding="async"
-                alt="The Launch tab for the sample AI: its chat bubble’s title, greeting, color and allowed websites, and a snippet to copy onto a website.">
-              <img class="ov-for-dark" src="/img/studio-launch-dark.webp" width="2000" height="1250" loading="lazy" decoding="async"
-                alt="The Launch tab for the sample AI: its chat bubble’s title, greeting, color and allowed websites, and a snippet to copy onto a website.">
-            </div>
-            <div class="ov-chat-box">
-              <img class="ov-chat-card" src="/img/studio-chat-card.webp" width="840" height="1048" loading="lazy" decoding="async" data-theme-free
-                alt="The sample AI’s chat window on a website, greeting a visitor with “Hi! How can I help?”">
-              <button class="ov-chat-bubble" type="button" aria-expanded="true" aria-label="Close the sample chat" hidden>
-                <svg class="ov-chat-icon-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 12.5a7.5 7.5 0 0 1-11 6.6L4.5 20l1-4A7.5 7.5 0 1 1 20 12.5z"/></svg>
-                <svg class="ov-chat-icon-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6.5 9.5 5.5 5.5 5.5-5.5"/></svg>
-              </button>
-            </div>
-          </div>
+      <h2 id="hm-run-title" class="ov-sr">A run in Heura Studios</h2>
+      <figure class="hm-film">
+        <div class="hm-frame">
+          <video class="hm-video" width="1440" height="900" muted loop playsinline controls preload="none"
+            data-light="/img/pipeline-run" data-dark="/img/pipeline-run-dark"
+            aria-describedby="hm-run-caption">
+            <source src="/img/pipeline-run.webm" type="video/webm">
+            <source src="/img/pipeline-run.mp4" type="video/mp4">
+          </video>
         </div>
-        <ol class="ov-tour-steps">
-          <li class="ov-tour-step" data-step="pick" aria-current="step">
-            <div class="ov-tour-text" data-reveal>
-              <span class="ov-step-n" aria-hidden="true">1</span>
-              <h3>Pick</h3>
-              <p>Name your AI and pick where it starts: a blank slate, or a kit for support, HR, IT or sales.</p>
-            </div>
-          </li>
-          <li class="ov-tour-step" data-step="teach">
-            <div class="ov-tour-text" data-reveal>
-              <span class="ov-step-n" aria-hidden="true">2</span>
-              <h3>Teach</h3>
-              <p>Drop in your documents, write rules in plain English and add example answers. It uses each one in its very next answer.</p>
-            </div>
-          </li>
-          <li class="ov-tour-step" data-step="train">
-            <div class="ov-tour-text" data-reveal>
-              <span class="ov-step-n" aria-hidden="true">3</span>
-              <h3>Train</h3>
-              <p>Give it an exam to see how ready it is, fix what it gets wrong, then train your lessons right into it.</p>
-            </div>
-          </li>
-          <li class="ov-tour-step" data-step="launch">
-            <div class="ov-tour-text" data-reveal>
-              <span class="ov-step-n" aria-hidden="true">4</span>
-              <h3>Launch</h3>
-              <p>Put a chat bubble on your website, connect your app through an API, or run it on your own computer.</p>
-            </div>
-          </li>
-        </ol>
-      </div>
+        <button class="hm-toggle" type="button" aria-label="Pause the recording" hidden>Pause</button>
+        <figcaption id="hm-run-caption" class="hm-caption">One run on a sample model in Heura Studios: 82 training rows (10 demonstrations and the replay mix), scored on the eval set before and after, promoted on a tie.</figcaption>
+      </figure>
     </div>
   </section>
 
-  <section class="ov-section" id="kits" aria-labelledby="ov-kits-title">
+  <section class="ov-section" id="sequence" aria-labelledby="hm-seq-title">
     <div class="ov-wrap ov-split">
       <div class="ov-head">
-        <h2 id="ov-kits-title" class="ov-h2" data-reveal>Starter kits</h2>
-        <p class="ov-section-lead" data-reveal style="--d:.08s">Every kit comes with 3 documents, 6 rules, 10 example answers and 8 test questions. Swap in your own anytime.</p>
+        <h2 id="hm-seq-title" class="ov-h2">The sequence</h2>
+        <p class="ov-section-lead">Operators produce the signal. The ML team owns the base model, the eval set and the gate.</p>
       </div>
-      <ul class="ov-kits" data-reveal="rule">
-        <li class="ov-kit" data-reveal style="--d:.1s">
-          <h3 id="ov-kit-support">Customer support</h3>
-          <ul class="ov-kit-docs" aria-labelledby="ov-kit-support"><li>Refund Policy</li><li>Shipping FAQ</li><li>Warranty</li></ul>
-        </li>
-        <li class="ov-kit" data-reveal style="--d:.18s">
-          <h3 id="ov-kit-hr">HR policy</h3>
-          <ul class="ov-kit-docs" aria-labelledby="ov-kit-hr"><li>Time Off Policy</li><li>Benefits Guide</li><li>Remote Work Policy</li></ul>
-        </li>
-        <li class="ov-kit" data-reveal style="--d:.26s">
-          <h3 id="ov-kit-it">IT helpdesk</h3>
-          <ul class="ov-kit-docs" aria-labelledby="ov-kit-it"><li>Passwords and MFA</li><li>VPN Guide</li><li>Laptop Requests</li></ul>
-        </li>
-        <li class="ov-kit" data-reveal style="--d:.34s">
-          <h3 id="ov-kit-sales">Sales</h3>
-          <ul class="ov-kit-docs" aria-labelledby="ov-kit-sales"><li>Product Sheet</li><li>Pricing</li><li>Objection Handling</li></ul>
-        </li>
-      </ul>
+      <ol class="hm-steps">
+        <li><h3>Ground</h3><p>Attach documents. Retrieval grounds each answer in them.</p></li>
+        <li><h3>Set policies</h3><p>Rules applied to every answer.</p></li>
+        <li><h3>Demonstrate</h3><p>Input and output pairs: the supervised fine-tuning data.</p></li>
+        <li><h3>Correct</h3><p>Fix an answer in the Playground. The correction becomes a training row.</p></li>
+        <li><h3>Evaluate</h3><p>An eval set of prompts, each with what a passing answer must contain. The result is a pass rate. Only the owner changes the eval set.</p></li>
+        <li><h3>Train</h3><p>Supervised fine-tuning: a LoRA adapter on Heura Arche, or OpenAI’s fine-tuning API. A replay mix rides along so the base keeps its general skills. The eval set runs before and after.</p></li>
+        <li><h3>Promote</h3><p>The new checkpoint replaces the live one, unless it scores lower. A tie promotes. The owner can also promote one by hand.</p></li>
+        <li><h3>Serve</h3><p>An OpenAI-compatible endpoint, an embed for your website, or an export: the adapter and a runtime.</p></li>
+      </ol>
     </div>
   </section>
 
-  <section class="ov-section" id="models" aria-labelledby="ov-models-title">
+  <section class="ov-section" id="claims" aria-labelledby="hm-claims-title">
     <div class="ov-wrap">
       <div class="ov-head">
-        <h2 id="ov-models-title" class="ov-h2" data-reveal>Models</h2>
-        <p class="ov-section-lead" data-reveal style="--d:.08s">Under the hood, your AI runs on Heura Arche, a model built on the open Qwen3-VL-2B and fine-tuned for business answers. Use it in Heura Studios or download it to your own computer. Two stronger ones are on the way.</p>
+        <h2 id="hm-claims-title" class="ov-h2">What it does, and what it doesn’t yet</h2>
       </div>
-      <div class="ov-models">
-        <article class="ov-panel ov-model ov-model-main" aria-labelledby="ov-arche" data-reveal="pop">
-          <p class="ov-status is-available" data-status><span class="ov-dot" aria-hidden="true"></span>Available</p>
-          <h3 id="ov-arche" class="ov-model-name">Heura Arche</h3>
-          <p class="ov-model-text">The base model your AI starts from. Small enough to run on a laptop, so your AI can too.</p>
-          <dl class="ov-specs">
-            <div><dt>Size</dt><dd>2B parameters</dd></div>
-            <div><dt>Understands</dt><dd>Text and images</dd></div>
-            <div><dt>Runs on</dt><dd>A laptop</dd></div>
-          </dl>
-        </article>
-        <article class="ov-panel ov-model" aria-labelledby="ov-asteria" data-reveal="pop" style="--d:.1s">
-          <p class="ov-status" data-status>Coming soon</p>
-          <h3 id="ov-asteria" class="ov-model-name">Heura Asteria</h3>
-          <p class="ov-model-text">Four times as powerful as Arche. It runs on a GPU, so you’ll need one.</p>
-        </article>
-        <article class="ov-panel ov-model" aria-labelledby="ov-aniketos" data-reveal="pop" style="--d:.2s">
-          <p class="ov-status" data-status>Coming soon</p>
-          <h3 id="ov-aniketos" class="ov-model-name">Heura Aniketos</h3>
-          <p class="ov-model-text">For long documents and harder questions.</p>
-        </article>
-      </div>
-      <!-- Bring your own: an AI can answer with another model instead, as on the Heura Studios app's Models page. The same
-           list as the starter kits. -->
-      <div class="ov-split ov-byo">
-        <div class="ov-head">
-          <h3 id="ov-byo-title" class="ov-byo-title" data-reveal>Or bring your own</h3>
-          <p class="ov-section-lead" data-reveal style="--d:.08s">Any AI can answer with another model instead, using your company’s own key. Teaching, tests and the chat on your website work the same.</p>
+      <div class="hm-claims">
+        <div>
+          <h3 id="hm-does">It does</h3>
+          <ul aria-labelledby="hm-does">
+            <li>Evaluates every run before and after it trains.</li>
+            <li>Holds back a run’s checkpoint that scores lower on the eval set than the live one. Only the owner can promote it by hand.</li>
+            <li>Trains LoRA adapters on Heura Arche, a 2B model built on Qwen3-VL-2B-Instruct, and runs supervised fine-tuning on OpenAI’s fine-tunable models.</li>
+            <li>Builds training rows from your demonstrations and corrections, plus a replay mix of Heura’s own data so the base keeps its general skills. Answers written by Claude, GPT or Gemini never enter a training set.</li>
+            <li>Serves an OpenAI-compatible endpoint: <code>/v1/chat/completions</code> and <code>/v1/models</code>.</li>
+            <li>Exports the active adapter with a runtime that has an OpenAI-compatible server, the Apache-2.0 licence and a NOTICE for Qwen.</li>
+            <li>Answers with a base model you bring: Claude, GPT, Gemini, or any model behind an OpenAI-compatible server.</li>
+            <li>Keeps the base model, the eval set, promotion, keys and exports with the owner.</li>
+          </ul>
         </div>
-        <ul class="ov-kits" data-reveal="rule" aria-labelledby="ov-byo-title">
-          <li class="ov-kit" data-reveal style="--d:.1s"><h4>Claude</h4><p class="ov-kit-docs">Anthropic’s models, with your Anthropic key.</p></li>
-          <li class="ov-kit" data-reveal style="--d:.18s"><h4>GPT</h4><p class="ov-kit-docs">OpenAI’s models, with your OpenAI key. GPT can also be trained on your examples.</p></li>
-          <li class="ov-kit" data-reveal style="--d:.26s"><h4>Gemini</h4><p class="ov-kit-docs">Google’s models, with a Google AI Studio key.</p></li>
-          <li class="ov-kit" data-reveal style="--d:.34s"><h4>Your own model</h4><p class="ov-kit-docs">Any model you run with Ollama, LM Studio, vLLM or another OpenAI-compatible server.</p></li>
-        </ul>
+        <div>
+          <h3 id="hm-doesnt">It doesn’t, yet</h3>
+          <ul aria-labelledby="hm-doesnt">
+            <li>Reinforcement learning or preference optimization. Training is supervised fine-tuning.</li>
+            <li>Training a base model you bring, except OpenAI’s fine-tunable models.</li>
+            <li>Sizes above 2B. Heura Arche is the one available.</li>
+            <li>SOC 2, VPC or on-premises deploys. Export, which runs the model on your own machine, is the self-hosted option.</li>
+            <li>Held-out evals. Nothing stops an eval prompt from also being a demonstration.</li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="ov-closing" aria-labelledby="ov-closing-title">
-    <div class="ov-wrap ov-intro">
-      <h2 id="ov-closing-title" class="ov-display" data-reveal>Build your first AI today.</h2>
-      <div class="ov-intro-side" data-reveal style="--d:.12s">
-        <p class="ov-lead">Make an account, pick a kit, and have an AI answering in minutes.</p>
-        <div class="ov-actions">
-          <a class="ov-btn ov-btn-primary" href="https://app.heurastudios.com/signup">Launch an agent</a>
+  <section class="ov-section hm-request" id="request" aria-labelledby="hm-request-title">
+    <div class="ov-wrap ov-split">
+      <div class="ov-head">
+        <h2 id="hm-request-title" class="ov-h2">Request access</h2>
+        <p class="ov-section-lead">Access is for teams whose company has a contract with Ostravanne. A founder checks every request and replies by email.</p>
+        <p class="hm-login">Already have access? <a href="https://app.heurastudios.com/login">Log in</a></p>
+      </div>
+      <div class="hm-request-body">
+        <!-- Without JavaScript this posts straight to the script behind the waitlist, which answers with a plain page. -->
+        <form id="hm-form" class="hm-form" action="https://script.google.com/macros/s/AKfycbymRmy_8immz1FDS9UUhf3K3dv8k77KYyOzTlwy4SzNQUM16fwwYgfr7wcwSkxPGGZW3g/exec" method="post" novalidate>
+          <div class="hm-field">
+            <label for="hm-name">Name</label>
+            <input id="hm-name" name="name" autocomplete="name" maxlength="100" required>
+          </div>
+          <div class="hm-field">
+            <label for="hm-email">Work email</label>
+            <input id="hm-email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required>
+          </div>
+          <div class="hm-field">
+            <label for="hm-company">Company</label>
+            <input id="hm-company" name="company" autocomplete="organization" maxlength="100" required>
+          </div>
+          <div class="hm-field">
+            <label for="hm-role">Role</label>
+            <input id="hm-role" name="role" autocomplete="organization-title" maxlength="100">
+          </div>
+          <div class="hm-field hm-field-wide">
+            <label for="hm-use">What will you specialize?</label>
+            <textarea id="hm-use" name="use" rows="4" maxlength="1000" aria-describedby="hm-use-hint"></textarea>
+            <p class="hm-hint" id="hm-use-hint">The model, and the work it should do.</p>
+          </div>
+          <!-- left empty by people; bots that fill every field get a polite ok and nothing is saved -->
+          <div class="hm-trap" aria-hidden="true">
+            <label for="hm-website">Website</label>
+            <input id="hm-website" name="website" tabindex="-1" autocomplete="off">
+          </div>
+          <input type="hidden" name="kind" value="request">
+          <input type="hidden" name="from" value="/">
+          <p class="hm-error" id="hm-error" role="alert"></p>
+          <div class="hm-submit-row">
+            <button class="ov-btn ov-btn-primary hm-submit" type="submit">Request access</button>
+            <p class="hm-fine">These details are used only to reply to you. See the <a href="/privacy/">Privacy Policy</a>.</p>
+          </div>
+        </form>
+        <div class="hm-done" id="hm-done" tabindex="-1" hidden>
+          <h3 class="hm-done-title">Request sent</h3>
+          <p id="hm-done-text"></p>
         </div>
       </div>
     </div>
@@ -261,10 +196,8 @@
         <nav aria-labelledby="ov-foot-product">
           <h2 id="ov-foot-product" class="ov-foot-title">Product</h2>
           <ul>
-            <li><a href="/#how">How it works</a></li>
-            <li><a href="/#kits">Starter kits</a></li>
-            <li><a href="/#models">Models</a></li>
-            <li><a href="https://app.heurastudios.com/signup">Launch an agent</a></li>
+            <li><a href="/#sequence">The sequence</a></li>
+            <li><a href="/#request">Request access</a></li>
             <li><a href="/blog/">Blog</a></li>
           </ul>
         </nav>

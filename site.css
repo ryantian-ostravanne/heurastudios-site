@@ -1,7 +1,7 @@
-/* heurastudios.com: one stylesheet for both pages.
+/* heurastudios.com: one stylesheet for every page.
    Type: Cantarell for every word, the headlines and leads (var(--serif)) as well as the rest (var(--sans)), in the two
    weights it has: 400, and 700 for the logo and the bold labels.
-   Color: black ink on a white page, one grey for panels, and the Heura orange only in the logo and on Arche's status.
+   Color: black ink on a white page, one grey for panels, and the Heura orange only in the logo.
    Every color is a token, light by default, dark under html[data-theme="dark"] (set before the first paint by the
    inline script in each page's <head>) or, with JavaScript off, under the system's dark setting. The tokens are
    registered so that changing the appearance cross-fades every color. */
@@ -149,144 +149,152 @@ button, input { font: inherit; color: inherit; }
 }
 @media (hover: hover) { .ov-nav a:hover { color: var(--ink); } }
 .ov-top-row > .ov-btn { flex: none; }
-@media (max-width: 879px) {   /* the four sections and Launch an agent need this much room */
+@media (max-width: 759px) {   /* the two sections need this much room beside Request access */
   .ov-nav { display: none; }
   .ov-top-row > .ov-btn { margin-left: auto; }
 }
-@media (max-width: 479px) {   /* a phone: the header's button says Launch (screen readers still hear Launch an agent) */
-  .ov-cta-more { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-}
-@media (max-width: 419px) {   /* a phone: the logo and Launch share 360 px */
+@media (max-width: 419px) {   /* a phone: the logo and Request access share the row */
   .ov-top-row { gap: 10px; }
   .ov-top-row > .ov-logo { font-size: 15px; }
   .ov-top-row > .ov-btn { padding: 0 14px; }
 }
+@media (max-width: 359px) {   /* the narrowest phones (320 px): the button a size smaller, its words whole */
+  .ov-top-row > .ov-btn { padding: 0 12px; font-size: 14px; }
+}
 
-/* ---- panels: the grey behind a picture or a model */
+/* ---- panels: the grey behind a picture (the waitlist's sample chat) */
 .ov-panel { border: 1px solid var(--edge); border-radius: clamp(16px, 1.8vw, 24px); background: var(--panel); }
 
-/* a screenshot standing in a panel, cut off by the panel's bottom edge */
-.ov-shot { overflow: hidden; padding: clamp(20px, 4.4vw, 64px) clamp(20px, 4.4vw, 64px) 0; }
-.ov-shot-img { display: block; }
-.ov-shot img {
-  width: 100%; border-radius: clamp(6px, .8vw, 10px) clamp(6px, .8vw, 10px) 0 0;
-  box-shadow: 0 0 0 1px var(--ring); background: var(--page);
-}
-
-/* ---- hero: the headline on the page's left edge, the lead and the buttons beside it, then Heura Studios itself */
-.ov-hero-stage { padding-top: clamp(40px, 7vw, 104px); }
-.ov-intro {
-  display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  column-gap: clamp(32px, 5vw, 80px); align-items: end;
-}
-.ov-line { display: inline-block; }
-.ov-hero-line { display: block; }
-.ov-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
-.ov-hero .ov-shot { margin-top: clamp(40px, 6vw, 80px); }
-/* on a phone, the screen at a size that can be read: its top-left corner, running off the panel's right edge */
-@media (max-width: 559px) { .ov-hero .ov-shot-img { width: 180%; } }
-@media (max-width: 999px) {
-  .ov-intro { grid-template-columns: minmax(0, 1fr); }
-  .ov-intro-side { margin-top: 20px; }
-}
-/* the hero's scene (site.js turns it on with motion, in a window at least 560px tall): the stage holds still under the
-   header while the runway after it scrolls by, and site.js moves the screen and brings in the lead's words and the
-   buttons as it goes, with translate, scale and opacity (the reveals transition none of them). The hero clips what
-   runs off the window's right edge, so nothing scrolls sideways; clip, unlike hidden, leaves the stage free to stick.
-   A button that hasn't come in yet takes no clicks. */
-.ov-hero-runway { height: 0; }
-.ov-scene { overflow-x: clip; }
-.ov-scene .ov-hero-stage { position: sticky; top: calc(var(--header) + 1px); } /* under the header and its rule */
-.ov-scene .ov-hero-runway { height: var(--scene, 0px); }
-.ov-scene .ov-intro { position: relative; z-index: 1; }
-.ov-scene .ov-shot { transform-origin: 0 0; will-change: translate, scale; }
-.ov-word { display: inline-block; }
-/* read by screen readers, not shown: the lead's sentence, whole, beside the words the scene brings in */
+/* read by screen readers, not shown */
 .ov-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+/* the first thing Tab reaches: shown only then */
+.ov-skip {
+  position: absolute; left: var(--gutter); top: 8px; z-index: 30; padding: 10px 16px; border-radius: 999px;
+  background: var(--ink); color: var(--page); font-size: 15px; transform: translateY(-160%);
+}
+.ov-skip:focus { transform: none; outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.ov-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
 
 /* ---- sections */
 .ov-section { margin-top: clamp(96px, 11vw, 168px); scroll-margin-top: calc(var(--header) + 32px); }
 .ov-head { max-width: 760px; }
 .ov-head + * { margin-top: clamp(40px, 5vw, 64px); }
-
-/* ---- models: Arche, the one that's out, large; the two still coming beside it */
-.ov-models { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 16px; }
-.ov-model { display: flex; flex-direction: column; min-height: 260px; padding: clamp(24px, 2.8vw, 40px); }
-.ov-model-main { grid-row: span 2; min-height: clamp(440px, 44vw, 600px); }
-.ov-status { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 400; line-height: 1.3; color: var(--ink-2); }
-.ov-status.is-available { color: var(--ink); }
-.ov-dot { position: relative; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
-.ov-dot::after { content: ""; position: absolute; inset: -5px; border: 1.5px solid var(--accent); border-radius: 50%; opacity: 0; pointer-events: none; }
-.ov-model-name {
-  margin-top: auto; padding-top: 40px; font-family: var(--serif); font-weight: 400;
-  font-size: clamp(28px, 1vw + 20px, 36px); line-height: 1.05; letter-spacing: -.015em;
-}
-.ov-model-main .ov-model-name { font-size: clamp(44px, 4vw + 20px, 80px); letter-spacing: -.024em; }
-.ov-model-text { margin-top: 10px; max-width: 26em; font-size: 16px; line-height: 1.5; color: var(--ink-2); }
-.ov-model-main .ov-model-text { margin-top: 14px; font-size: 17px; }
-.ov-specs { margin-top: 28px; border-top: 1px solid var(--rule); }
-.ov-specs div { display: flex; justify-content: space-between; gap: 16px; padding: 13px 0; border-bottom: 1px solid var(--rule); font-size: 15px; line-height: 1.4; }
-.ov-specs dt { color: var(--ink-2); }
-.ov-specs dd { text-align: right; }
+/* a heading on the left, what it heads on the right */
+.ov-split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: clamp(32px, 5vw, 80px); align-items: start; }
+.ov-split > .ov-head + * { margin-top: 0; }
 @media (max-width: 899px) {
-  .ov-models { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  .ov-model-main { grid-column: 1 / -1; grid-row: auto; min-height: 0; }
+  .ov-split { grid-template-columns: minmax(0, 1fr); }
+  .ov-split > .ov-head + * { margin-top: clamp(32px, 5vw, 48px); }
 }
+
+/* ---- the home page. Quiet on purpose: the recording is the one thing that moves. */
+/* the hero: the headline on the left, the lead and the buttons beside it */
+.hm-hero { padding-top: clamp(48px, 8vw, 120px); }
+.hm-hero-row {
+  display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  column-gap: clamp(32px, 5vw, 80px); align-items: end;
+}
+.hm-title { max-width: 11.5em; }
+@media (max-width: 999px) {
+  .hm-hero-row { grid-template-columns: minmax(0, 1fr); }
+  .hm-hero-side { margin-top: 24px; }
+}
+
+/* the recording: a run in Heura Studios, in a thin frame */
+.hm-run { margin-top: clamp(48px, 7vw, 96px); }
+.hm-frame {
+  position: relative; overflow: hidden; aspect-ratio: 1440 / 900;
+  border-radius: clamp(8px, 1.1vw, 14px); box-shadow: 0 0 0 1px var(--ring);
+  /* the recording's first frame, for the appearance in use, until the video has one of its own */
+  background: var(--panel) url("/img/pipeline-run.webp") center / cover no-repeat;
+}
+:root[data-theme="dark"] .hm-frame { background-image: url("/img/pipeline-run-dark.webp"); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme]) .hm-frame { background-image: url("/img/pipeline-run-dark.webp"); } }
+.hm-video { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* under it, the caption, and Pause beside it (below it on a phone): a sibling, so it's no part of the caption */
+.hm-film { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 32px; }
+.hm-frame { grid-column: 1 / -1; }
+.hm-caption { grid-row: 2; grid-column: 1; max-width: 46em; margin-top: 14px; font-size: 15px; line-height: 1.5; color: var(--ink-2); }
+.hm-toggle {
+  grid-row: 2; grid-column: 2; align-self: start; margin-top: 6px;
+  display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px;
+  border: 0; border-radius: 999px; background: var(--panel); color: var(--ink); box-shadow: inset 0 0 0 1px var(--edge);
+  font: inherit; font-size: 15px; line-height: 1; cursor: pointer;
+}
+.hm-toggle:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.hm-toggle[hidden] { display: none; }
+@media (max-width: 599px) {
+  .hm-film { grid-template-columns: minmax(0, 1fr); }
+  .hm-toggle { grid-row: 3; grid-column: 1; justify-self: start; margin-top: 12px; }
+}
+
+/* the sequence: eight operations, in order */
+.hm-steps { counter-reset: step; border-top: 1px solid var(--ink); }
+.hm-steps li {
+  display: grid; grid-template-columns: 2.4em minmax(0, 8.5em) minmax(0, 1fr); gap: 4px 20px; padding: 18px 0 19px;
+  border-bottom: 1px solid var(--line); counter-increment: step;
+}
+.hm-steps li::before { content: counter(step); padding-top: 1px; font-size: 15px; line-height: 1.5; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.hm-steps h3 { font-size: 17px; font-weight: 700; line-height: 1.45; letter-spacing: -.01em; }
+.hm-steps p { font-size: 16px; line-height: 1.5; color: var(--ink-2); }
 @media (max-width: 559px) {
-  .ov-models { grid-template-columns: minmax(0, 1fr); }
-  .ov-model { min-height: 0; }
+  .hm-steps li { grid-template-columns: 2em minmax(0, 1fr); }
+  .hm-steps p { grid-column: 2; }
 }
 
-/* ---- how it works: a tour. The stage stays in view while the four steps scroll by beside it (above them on narrow
-   screens); it shows the screen of the step level with it, and each step's rule fills in as it's passed. */
-.ov-tour { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); column-gap: clamp(32px, 5vw, 80px); }
-.ov-tour-stage {
-  position: sticky; z-index: 1; grid-column: 2; grid-row: 1; align-self: start; display: grid;
-  top: max(calc(var(--header) + 16px), calc((100vh + var(--header) - var(--stage-h, 440px)) / 2));
+/* what it does, and what it doesn't yet: two plain lists */
+.hm-claims { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px clamp(32px, 5vw, 80px); }
+.hm-claims h3 { padding-bottom: 14px; border-bottom: 1px solid var(--ink); font-size: 17px; font-weight: 700; line-height: 1.45; }
+.hm-claims li { padding: 14px 0 15px; border-bottom: 1px solid var(--line); font-size: 16px; line-height: 1.5; text-wrap: pretty; }
+.hm-claims code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .9em; }
+@media (max-width: 759px) { .hm-claims { grid-template-columns: minmax(0, 1fr); } }
+
+/* Request access */
+:root { --bad: #b42318; } /* 6.5:1 on the page */
+:root[data-theme="dark"] { --bad: #ff8a80; } /* 9.4:1 on the page */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bad: #ff8a80; } }
+.hm-request { padding-bottom: clamp(88px, 10vw, 144px); }
+/* the way in for teams that have access: where Request access leads, not in the header (Ryan, Oct 19) */
+.hm-login { margin-top: 20px; font-size: 16px; line-height: 1.5; color: var(--ink-2); }
+.hm-login a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.hm-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.hm-field { display: grid; gap: 8px; align-content: start; }
+.hm-field-wide, .hm-error, .hm-submit-row { grid-column: 1 / -1; }
+.hm-field label { font-size: 15px; font-weight: 700; line-height: 1.3; }
+.hm-field input, .hm-field textarea {
+  display: block; width: 100%; margin: 0; padding: 13px 16px; border: 1px solid var(--field); border-radius: 12px;
+  background: var(--page); color: var(--ink); font: inherit; font-size: 17px; line-height: 1.4;
+  transition: border-color .15s ease; -webkit-appearance: none; appearance: none;
 }
-.ov-tour-shot { grid-area: 1 / 1; }
-.ov-tour .ov-shot { padding: clamp(16px, 3vw, 40px) clamp(16px, 3vw, 40px) 0; }
-.ov-js .ov-tour-shot {
-  opacity: 0; visibility: hidden; transform: translateY(14px) scale(.985);
-  transition: opacity .45s ease, transform .7s var(--ease-out), visibility 0s linear .45s;
+.hm-field input { height: 52px; padding-top: 0; padding-bottom: 0; }
+.hm-field textarea { min-height: 120px; resize: vertical; }
+@media (hover: hover) { .hm-field input:hover, .hm-field textarea:hover { border-color: var(--ink-2); } }
+.hm-field input:focus, .hm-field textarea:focus { outline: 2px solid var(--ink); outline-offset: 2px; border-color: var(--ink-2); }
+/* (after :focus, with the same weight, so a field that needs fixing keeps its red edge while it's being fixed) */
+.hm-field input[aria-invalid="true"], .hm-field textarea[aria-invalid="true"] { border-color: var(--bad); }
+.hm-field input:-webkit-autofill {
+  -webkit-text-fill-color: var(--ink); -webkit-box-shadow: 0 0 0 1000px var(--page) inset; caret-color: var(--ink);
 }
-.ov-js .ov-tour-shot.is-active { opacity: 1; visibility: visible; transform: none; transition: opacity .45s ease, transform .7s var(--ease-out), visibility 0s; }
-:root:not(.ov-js) .ov-tour-shot:not(.is-active) { display: none; }
-.ov-tour-steps { grid-column: 1; grid-row: 1; }
-.ov-tour-step { display: flex; flex-direction: column; justify-content: center; min-height: 64vh; }
-.ov-tour-text { position: relative; max-width: 28em; padding-top: 20px; }
-.ov-tour-text::before,
-.ov-tour-text::after { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; transform-origin: 0 50%; }
-.ov-tour-text::before { background: var(--line); }
-.ov-tour-text::after { background: var(--ink); transform: scaleX(var(--fill, 1)); }
-.ov-step-n { display: block; font-size: 14px; font-weight: 400; line-height: 1.3; color: var(--ink-2); font-variant-numeric: tabular-nums; }
-.ov-tour-step h3 {
-  margin-top: clamp(16px, 2vw, 24px); font-family: var(--serif); font-weight: 400;
-  font-size: clamp(30px, 1.4vw + 20px, 40px); line-height: 1.08; letter-spacing: -.014em; transition: color .3s ease;
-}
-.ov-js .ov-tour-step:not([aria-current]) h3 { color: var(--ink-2); }
-.ov-tour-step p { margin-top: 12px; font-size: 17px; line-height: 1.5; color: var(--ink-2); }
-/* narrow screens: the stage sits above the steps, and the text of the step being read waits just under it until the
-   next one pushes it on */
-@media (max-width: 899px) {
-  .ov-tour { grid-template-columns: minmax(0, 1fr); }
-  .ov-tour-stage { grid-column: 1; top: var(--header); margin: 0 calc(-1 * var(--gutter)); padding: 12px var(--gutter) 16px; background: var(--page); }
-  .ov-tour-steps { grid-row: 2; }
-  .ov-tour-step { justify-content: flex-start; min-height: 60vh; padding-top: 24px; }
-  .ov-tour-text { position: sticky; top: calc(var(--header) + var(--stage-h, 268px) + 20px); }
-  .ov-tour .ov-shot { height: clamp(180px, min(42vw, 40vh), 340px); }
-}
-/* a phone on its side has no room to pin anything: the stage and the steps just scroll */
-@media (max-width: 899px) and (max-height: 520px) {
-  .ov-tour-stage, .ov-tour-text { position: static; }
-}
-@media (max-width: 559px) { .ov-tour .ov-shot-img { width: 170%; } }
+.hm-hint { font-size: 14px; line-height: 1.45; color: var(--ink-2); }
+.hm-trap { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+.hm-error { font-size: 15px; font-weight: 700; line-height: 1.45; color: var(--bad); }
+/* empty, it stays in the accessibility tree (so its first message is announced like the rest), out of the grid's flow */
+.hm-error:empty { position: absolute; }
+.hm-submit-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 8px; }
+.hm-submit[disabled] { opacity: .6; cursor: progress; }
+.hm-fine { font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.hm-fine a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.hm-done { padding: clamp(24px, 3vw, 36px); border-radius: clamp(16px, 1.8vw, 24px); background: var(--panel); }
+.hm-done:focus { outline: none; }
+.hm-done-title { font-size: 22px; font-weight: 700; line-height: 1.3; }
+.hm-done p { margin-top: 8px; font-size: 17px; line-height: 1.5; color: var(--ink-2); }
+@media (max-width: 559px) { .hm-form { grid-template-columns: minmax(0, 1fr); } }
 
 /* the chat bubble the sample AI puts on a website: its window (a screenshot) above the bubble (a real button that
    opens and closes it, like the real one). The panel is the website. Sizes are the widget's own, scaled together:
    the window 372 wide in a 420 by 536 box, the bubble 56 across, 20 in from the right. */
 .ov-chat { position: relative; overflow: hidden; --chat-pad: clamp(12px, 2.2vw, 32px); }
-.ov-tour .ov-chat-box { top: auto; bottom: var(--chat-pad); height: calc(86% - var(--chat-pad)); }
 .ov-chat-box { position: absolute; top: var(--chat-pad); right: var(--chat-pad); height: calc(100% - 2 * var(--chat-pad)); aspect-ratio: 420 / 536; }
 .ov-chat-card {
   position: absolute; top: 0; right: 0; width: 100%; height: auto; transform-origin: 95.2% 88.5%;
@@ -308,32 +316,6 @@ button, input { font: inherit; color: inherit; }
 .ov-chat-bubble:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .ov-chat.is-open .ov-chat-icon-chat,
 .ov-chat:not(.is-open) .ov-chat-icon-down { display: none; }
-
-/* ---- starter kits: what's in every kit on the left, each kit's documents on the right */
-.ov-split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: clamp(32px, 5vw, 80px); align-items: start; }
-.ov-split > .ov-head + * { margin-top: 0; }
-.ov-kits { position: relative; }
-.ov-kits::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--ink); transform-origin: 0 50%; }
-.ov-kit { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 4px 24px; padding: 20px 0 21px; border-bottom: 1px solid var(--line); }
-.ov-kit h3, .ov-kit h4 { font-size: 17px; font-weight: 700; line-height: 1.4; letter-spacing: -.01em; }
-.ov-kit-docs { font-size: 16px; line-height: 1.5; color: var(--ink-2); }
-.ov-kit-docs li { display: inline; }
-.ov-kit-docs li:not(:last-child)::after { content: ", "; }
-@media (max-width: 899px) {
-  .ov-split { grid-template-columns: minmax(0, 1fr); }
-  .ov-split > .ov-head + * { margin-top: clamp(32px, 5vw, 48px); }
-}
-@media (max-width: 479px) { .ov-kit { grid-template-columns: minmax(0, 1fr); } }
-/* ---- bring your own: under the model cards, the same list as the kits */
-.ov-byo { margin-top: clamp(64px, 8vw, 112px); }
-.ov-byo-title {
-  font-family: var(--serif); font-weight: 400; font-size: clamp(26px, 1.4vw + 18px, 40px);
-  line-height: 1.1; letter-spacing: -.016em; text-wrap: balance;
-}
-
-/* ---- closing: the same shape as the hero */
-.ov-closing { margin-top: clamp(112px, 13vw, 200px); padding-bottom: clamp(88px, 10vw, 144px); }
-.ov-closing .ov-display { font-size: clamp(36px, 3.4vw + 18px, 64px); }
 
 /* ---- footer: always dark */
 .ov-foot {
@@ -370,36 +352,18 @@ button, input { font: inherit; color: inherit; }
 .ov-seg input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }
 @media (hover: hover) { .ov-seg input:not(:checked):hover + span { color: var(--ink); } }
 
-/* ---- motion. Things rise into place once as they come into view (site.js adds .is-in); the hero's screen rises out
-   of its panel; the model cards pop; the rule above the kits draws itself; Arche's dot pings twice. All of it only
-   under .ov-motion, which the head script sets unless Reduce Motion is on: without JavaScript nothing is hidden, and
-   if site.js never runs, everything shows after a moment anyway. */
+/* ---- motion (the waitlist page). Things rise into place once as they come into view (site.js adds .is-in), only
+   under .ov-motion, which that page's head script sets unless Reduce Motion is on: without JavaScript nothing is
+   hidden, and if site.js never runs, everything shows after a moment anyway. The home page sets no .ov-motion. */
 :root { --ease-out: cubic-bezier(.16, 1, .3, 1); }
 .ov-motion [data-reveal] { opacity: 0; transform: translateY(24px); }
-.ov-motion [data-reveal="pop"] { transform: translateY(40px) scale(.96); }
-.ov-motion [data-reveal="window"] { transform: none; }
-.ov-motion [data-reveal="window"] .ov-shot-img { transform: translateY(72px); }
-.ov-motion [data-reveal="rule"] { opacity: 1; transform: none; }
-.ov-motion [data-reveal="rule"]::before { transform: scaleX(0); }
 .ov-motion.ov-live [data-reveal] { transition: opacity .8s var(--ease-out) var(--d, 0s), transform 1s var(--ease-out) var(--d, 0s); }
-.ov-motion.ov-live [data-reveal="window"] .ov-shot-img { transition: transform 1.3s var(--ease-out) calc(var(--d, 0s) + .08s); }
-.ov-motion.ov-live [data-reveal="rule"]::before { transition: transform 1.2s var(--ease-out) var(--d, 0s); }
 .ov-motion [data-reveal].is-in { opacity: 1; transform: none; }
-.ov-motion [data-reveal="window"].is-in .ov-shot-img,
-.ov-motion [data-reveal="rule"].is-in::before { transform: none; }
-.ov-motion:not(.ov-live) [data-reveal],
-.ov-motion:not(.ov-live) [data-reveal] .ov-shot-img,
-.ov-motion:not(.ov-live) [data-reveal="rule"]::before { animation: ov-show .6s ease 2.5s forwards; }
+.ov-motion:not(.ov-live) [data-reveal] { animation: ov-show .6s ease 2.5s forwards; }
 @keyframes ov-show { to { opacity: 1; transform: none; } }
-.ov-motion [data-parallax] { translate: 0 var(--shift, 0px); }
-.ov-motion .ov-model-main.is-in .ov-dot::after { animation: ov-ping 1.5s var(--ease-out) .9s 2; }
-@keyframes ov-ping { from { opacity: .85; transform: scale(.4); } to { opacity: 0; transform: scale(1.9); } }
 
 @media print {
-  .ov-motion [data-reveal], .ov-motion [data-reveal] .ov-shot-img { opacity: 1 !important; transform: none !important; }
-  .ov-scene .ov-hero-stage { position: static; }
-  .ov-scene .ov-hero-runway { height: 0; }
-  .ov-scene h1, .ov-scene .ov-shot, .ov-scene .ov-word, .ov-scene .ov-btn { opacity: 1 !important; translate: none !important; scale: none !important; }
+  .ov-motion [data-reveal] { opacity: 1 !important; transform: none !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
