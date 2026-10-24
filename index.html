@@ -68,11 +68,15 @@
       <h2 id="hm-run-title" class="ov-sr">A run in Heura Studios</h2>
       <figure class="hm-film">
         <div class="hm-frame">
+          <!-- On a phone, the Studio recorded at a phone's size. The .mp4 first: every iPhone decodes H.264 itself. -->
           <video class="hm-video" width="1440" height="900" muted loop playsinline controls preload="none"
             data-light="/img/pipeline-run" data-dark="/img/pipeline-run-dark"
+            data-phone-light="/img/pipeline-run-phone" data-phone-dark="/img/pipeline-run-phone-dark"
             aria-describedby="hm-run-caption">
-            <source src="/img/pipeline-run.webm" type="video/webm">
+            <source src="/img/pipeline-run-phone.mp4" type="video/mp4" media="(max-width: 599px)">
+            <source src="/img/pipeline-run-phone.webm" type="video/webm" media="(max-width: 599px)">
             <source src="/img/pipeline-run.mp4" type="video/mp4">
+            <source src="/img/pipeline-run.webm" type="video/webm">
           </video>
         </div>
         <button class="hm-toggle" type="button" aria-label="Pause the recording" hidden>Pause</button>

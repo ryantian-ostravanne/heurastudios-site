@@ -5,15 +5,17 @@
 
   // ── the recording ──────────────────────────────────────────────────
   // It plays muted and looping, without the browser's controls, while it's on screen, in the file made for the
-  // appearance in use. Pause stops it (and Play starts it again); with Reduce Motion it waits on its first frame until
-  // Play. Without JavaScript the browser's controls show instead and nothing plays by itself.
+  // appearance in use (and on a phone, the one recorded at a phone's size: the sources' media picks it). Pause stops it
+  // (and Play starts it again); with Reduce Motion it waits on its first frame until Play. Without JavaScript the
+  // browser's controls show instead and nothing plays by itself.
   var video = document.querySelector('.hm-video');
   var toggle = document.querySelector('.hm-toggle');
   if (video && toggle && video.canPlayType) {
     var still = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : null;
+    var phone = window.matchMedia ? matchMedia('(max-width: 599px)') : null;   // as the sources' media says
     var visible = false;
     var chose = null;   // true or false once the visitor has pressed Play or Pause: theirs from then on
-    var base = video.getAttribute('data-light');   // the files the HTML names
+    var theme = 'light';   // the appearance of the files the HTML names
 
     var wanted = function () { return chose !== null ? chose : !(still && still.matches); };
     var start = function () {
@@ -26,15 +28,18 @@
       toggle.textContent = on ? 'Pause' : 'Play';
       toggle.setAttribute('aria-label', on ? 'Pause the recording' : 'Play the recording');
     };
-    var pick = function () {   // the light or the dark recording, as the page is (load() only to change the files)
-      var want = video.getAttribute('data-' + (root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'));
-      if (!want) return;
-      video.poster = want + '.webp';   // (the frame's background already is: a fetch from the cache)
-      if (want === base) return;
-      base = want;
-      var sources = video.querySelectorAll('source');
-      sources[0].src = want + '.webm';
-      sources[1].src = want + '.mp4';
+    var pick = function () {   // the light or the dark recordings, as the page is (load() only to change the files)
+      var want = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      var desk = video.getAttribute('data-' + want), hand = video.getAttribute('data-phone-' + want);
+      if (!desk || !hand) return;
+      video.poster = (phone && phone.matches ? hand : desk) + '.webp';   // (the frame's background already is)
+      if (want === theme) return;
+      theme = want;
+      var sources = video.querySelectorAll('source');   // phone .mp4 and .webm, then the desktop's
+      sources[0].src = hand + '.mp4';
+      sources[1].src = hand + '.webm';
+      sources[2].src = desk + '.mp4';
+      sources[3].src = desk + '.webm';
       video.load();
       sync();
     };
@@ -53,6 +58,9 @@
       visible = true;
     }
     if (still && still.addEventListener) still.addEventListener('change', sync);
+    // a phone turned to a wider screen (or a window narrowed past it): the sources' media picks the other recording,
+    // which the browser only does on load()
+    if (phone && phone.addEventListener) phone.addEventListener('change', function () { pick(); video.load(); sync(); });
     // the appearance changed (the footer's setting, or the system's): the other recording
     new MutationObserver(pick).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
     sync();

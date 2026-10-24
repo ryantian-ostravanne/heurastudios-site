@@ -12,10 +12,13 @@ and Log in, for teams that have access, is beside its form, not in a header or f
   project.
 - `site.css`, `site.js`: shared by every page: the tokens (light and dark), the header, buttons, the footer and its
   Appearance setting, the header's rule once the page scrolls, and the waitlist page's reveals and sample chat.
-- `img/pipeline-run.*` and `img/pipeline-run-dark.*`: the recording (VP9 `.webm`, H.264 `.mp4`) and its first frame
-  (`.webp`, the poster). Recorded from the real Studio with `_tools/record-pipeline.py` (a fresh throwaway Studio with
-  the stand-in model and trainer, a sample model for a made-up shop, "Fernbrook Supply Co."), so it can be recorded
-  again: `python3 _tools/record-pipeline.py <app checkout> img` and again with `--dark`.
+- `img/pipeline-run.*` and `img/pipeline-run-dark.*`: the recording (H.264 `.mp4`, offered first since every iPhone
+  decodes it itself, and VP9 `.webm`) and its first frame (`.webp`, the poster). `img/pipeline-run-phone.*` and
+  `img/pipeline-run-phone-dark.*`: the same run recorded at a phone's size (390 x 600, drawn at 2x), with taps and
+  swipes; phones get these (the sources' `media`, `(max-width: 599px)`). Recorded from the real Studio with
+  `_tools/record-pipeline.py` (a fresh throwaway Studio with the stand-in model and trainer, a sample model for a
+  made-up shop, "Fernbrook Supply Co."), so they can be recorded again:
+  `python3 _tools/record-pipeline.py <app checkout> img`, and again with `--dark`, `--phone`, and `--phone --dark`.
 - `img/studio-*.webp`: Studio screens from Oct 13 (the waitlist page's sample chat card is `studio-chat-card.webp`).
 - `waitlist/`: the old waitlist form. Its `action` is the Apps Script web app. The home page's Request access form posts
   to the same script with `kind=request` and three more fields.

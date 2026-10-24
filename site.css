@@ -212,6 +212,14 @@ button, input { font: inherit; color: inherit; }
 :root[data-theme="dark"] .hm-frame { background-image: url("/img/pipeline-run-dark.webp"); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme]) .hm-frame { background-image: url("/img/pipeline-run-dark.webp"); } }
 .hm-video { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* on a phone, the Studio recorded at a phone's size (390 x 600), and its own first frame */
+@media (max-width: 599px) {
+  .hm-frame { aspect-ratio: 390 / 600; background-image: url("/img/pipeline-run-phone.webp"); }
+  :root[data-theme="dark"] .hm-frame { background-image: url("/img/pipeline-run-phone-dark.webp"); }
+}
+@media (max-width: 599px) and (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .hm-frame { background-image: url("/img/pipeline-run-phone-dark.webp"); }
+}
 /* under it, the caption, and Pause beside it (below it on a phone): a sibling, so it's no part of the caption */
 .hm-film { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 32px; }
 .hm-frame { grid-column: 1 / -1; }
