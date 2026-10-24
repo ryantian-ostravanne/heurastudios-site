@@ -5,8 +5,9 @@ and Log in, for teams that have access, is beside its form, not in a header or f
 `/waitlist/` for anyone with an old link.
 
 - `index.html`, `home.js`: the home page (Oct 24, 2026). The hero, a looping screen recording of one run in Heura
-  Studios (light and dark; Pause; with Reduce Motion it waits for Play; off screen it rests), the eight operations in
-  order, what it does and doesn't do yet, and the Request access form. Quiet on purpose: the recording is the one thing
+  Studios (light and dark; Pause; with Reduce Motion it waits for Play; off screen it rests), Tools (the Studio's own
+  tool palette: its eleven tools in its three groups, with its icons and group colors, the owner's on dark tiles, and
+  what each takes and gives), what it does and doesn't do yet, and the Request access form. Quiet on purpose: the recording is the one thing
   that moves. The words follow `claude/heura-studios-positioning.md` in the Heura Studios project.
 - `site.css`, `site.js`: shared by every page: the tokens (light and dark), the header, buttons, the footer and its
   Appearance setting, the header's rule once the page scrolls, and the waitlist page's reveals and sample chat.

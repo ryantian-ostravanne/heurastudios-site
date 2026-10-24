@@ -41,7 +41,7 @@
   <div class="ov-wrap ov-top-row">
     <a class="ov-logo" href="/"><span class="ov-mark" aria-hidden="true"></span>Heura Studios</a>
     <nav class="ov-nav" aria-label="Sections">
-      <a href="#sequence">The sequence</a>
+      <a href="#tools">Tools</a>
       <a href="/blog/">Blog</a>
     </nav>
     <a class="ov-btn ov-btn-primary ov-btn-small" href="#request">Request access</a>
@@ -81,22 +81,99 @@
     </div>
   </section>
 
-  <section class="ov-section" id="sequence" aria-labelledby="hm-seq-title">
+  <section class="ov-section" id="tools" aria-labelledby="hm-tools-title">
     <div class="ov-wrap ov-split">
       <div class="ov-head">
-        <h2 id="hm-seq-title" class="ov-h2">The sequence</h2>
-        <p class="ov-section-lead">Operators produce the signal. The ML team owns the base model, the eval set and the gate.</p>
+        <h2 id="hm-tools-title" class="ov-h2">Tools</h2>
+        <p class="ov-section-lead">Operators bring the signal. The owner keeps the eval set, the base model and the gate.</p>
+        <p class="hm-key"><span class="hm-key-tile" aria-hidden="true"></span>Owner only</p>
       </div>
-      <ol class="hm-steps">
-        <li><h3>Ground</h3><p>Attach documents. Retrieval grounds each answer in them.</p></li>
-        <li><h3>Set policies</h3><p>Rules applied to every answer.</p></li>
-        <li><h3>Demonstrate</h3><p>Input and output pairs: the supervised fine-tuning data.</p></li>
-        <li><h3>Correct</h3><p>Fix an answer in the Playground. The correction becomes a training row.</p></li>
-        <li><h3>Evaluate</h3><p>An eval set of prompts, each with what a passing answer must contain. The result is a pass rate. Only the owner changes the eval set.</p></li>
-        <li><h3>Train</h3><p>Supervised fine-tuning: a LoRA adapter on Heura Arche, or OpenAI’s fine-tuning API. A replay mix rides along so the base keeps its general skills. The eval set runs before and after.</p></li>
-        <li><h3>Promote</h3><p>The new checkpoint replaces the live one, unless it scores lower. A tie promotes. The owner can also promote one by hand.</p></li>
-        <li><h3>Serve</h3><p>An OpenAI-compatible endpoint, an embed for your website, or an export: the adapter and a runtime.</p></li>
-      </ol>
+      <!-- The Studio's own tool palette (web/studio/views/pipeline.js in the app): its tools in its groups, with its icons on
+           its group colors, the owner's on dark tiles; and for each, what it takes and what it gives. -->
+      <div class="hm-tools">
+        <p class="hm-tools-cols" aria-hidden="true"><span>Takes</span><span>Gives</span></p>
+        <div class="hm-tool-group cat-signal">
+          <h3 class="hm-group-name" id="hm-tools-signal"><span class="hm-dot" aria-hidden="true"></span>Signal</h3>
+          <ul aria-labelledby="hm-tools-signal">
+            <li class="hm-tool">
+              <span class="hm-tile" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 1.5h5l3 3v10H4z"/><path d="M9 1.5v3h3"/><path d="M6 8.5h4M6 11h4"/></svg></span>
+              <span class="hm-tool-id"><span class="hm-tool-name">Ground</span></span>
+              <span class="hm-io"><span class="hm-io-label">Takes</span> documents</span>
+              <span class="hm-io"><span class="hm-io-label">Gives</span> context, retrieved at answer time</span>
+            </li>
+            <li class="hm-tool">
+              <span class="hm-tile" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5h1M2.5 8h1M2.5 11.5h1M6 4.5h7.5M6 8h7.5M6 11.5h7.5"/></svg></span>
+              <span class="hm-tool-id"><span class="hm-tool-name">Set policies</span></span>
+              <span class="hm-io"><span class="hm-io-label">Takes</span> rules</span>
+              <span class="hm-io"><span class="hm-io-label">Gives</span> a policy every answer follows</span>
+            </li>
+            <li class="hm-tool">
+              <span class="hm-tile" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3.5" width="5" height="9" rx="1"/><rect x="9.5" y="3.5" width="5" height="9" rx="1"/><path d="M6.5 8h3"/></svg></span>
+              <span class="hm-tool-id"><span class="hm-tool-name">Demonstrate</span></span>
+              <span class="hm-io"><span class="hm-io-label">Takes</span> input and output pairs</span>
+              <span class="hm-io"><span class="hm-io-label">Gives</span> training rows, three per new pair</span>
+            </li>
+            <li class="hm-tool">
+              <span class="hm-tile" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 2.5l3 3-8 8h-3v-3z"/><path d="M9 4l3 3"/></svg></span>
+              <span class="hm-tool-id"><span class="hm-tool-name">Correct</span></span>
+              <span class="hm-io"><span class="hm-io-label">Takes</span> an answer from the Playground, fixed or marked good</span>
+              <span class="hm-io"><span class="hm-io-label">Gives</span> a demonstration</span>
+            </li>
+            <li class="hm-tool is-soon">
+              <span class="hm-tile" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h12v8H8.5l-3 2.5V11H2z"/><path d="M5 6h6M5 8.5h3.5"/></svg></span>
+              <span class="hm-tool-id"><span class="hm-tool-name">Interview</span> <span class="hm-soon">Soon</span></span>
+              <span class="hm-io"><span class="hm-io-label">Takes</span> an operator’s answers to the model’s questions</span>
+              <span class="hm-io"><span class="hm-io-label">Gives</span> facts and rules it answers from</span>
+            </li>
+          </ul>
+        </div>
+        <div class="hm-tool-group cat-train">
+          <h3 class="hm-group-name" id="hm-tools-train"><span class="hm-dot" aria-hidden="true"></span>Evaluate and train</h3>
+          <ul aria-labelledby="hm-tools-train">
+            <li class="hm-tool is-owner">
+              <span class="hm-tile" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5l1.5 1.5 2.5-3M2.5 10.5l1.5 1.5 2.5-3M9 5h4.5M9 11h4.5"/></svg></span>
+              <span class="hm-tool-id"><span class="hm-tool-name">Evaluate</span> <span class="hm-owner">Owner only</span></span>
+              <span class="hm-io"><span class="hm-io-label">Takes</span> prompts, each with what a passing answer must contain</span>
+              <span class="hm-io"><span class="hm-io-label">Gives</span> a pass rate, before and after every run</span>
+            </li>
+            <li class="hm-tool is-owner">
+              <span class="hm-tile" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5l6 3.25v6.5L8 14.5l-6-3.25v-6.5z"/><path d="M2 4.75L8 8l6-3.25M8 8v6.5"/></svg></span>
+              <span class="hm-tool-id"><span class="hm-tool-name">Base model</span> <span class="hm-owner">Owner only</span></span>
+              <span class="hm-io"><span class="hm-io-label">Takes</span> Heura Arche (2B), or a model you bring</span>
+              <span class="hm-io"><span class="hm-io-label">Gives</span> the model that answers</span>
+            </li>
+            <li class="hm-tool">
+              <span class="hm-tile" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 1.5v12.5h12.5"/><path d="M4.5 3.5c1.2 5 3.5 7 9 7.5"/></svg></span>
+              <span class="hm-tool-id"><span class="hm-tool-name">Train</span></span>
+              <span class="hm-io"><span class="hm-io-label">Takes</span> new demonstrations and corrections, plus a replay mix</span>
+              <span class="hm-io"><span class="hm-io-label">Gives</span> a LoRA checkpoint on Heura Arche</span>
+            </li>
+            <li class="hm-tool is-owner">
+              <span class="hm-tile" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5v10.5h12.5"/><path d="M4.5 5.5c1 3.8 3 5.6 7 6"/><path d="M10.5 1.5h4v4M14.5 1.5L10 6"/></svg></span>
+              <span class="hm-tool-id"><span class="hm-tool-name">Train on OpenAI</span> <span class="hm-owner">Owner only</span></span>
+              <span class="hm-io"><span class="hm-io-label">Takes</span> the same rows</span>
+              <span class="hm-io"><span class="hm-io-label">Gives</span> a fine-tuned OpenAI model</span>
+            </li>
+          </ul>
+        </div>
+        <div class="hm-tool-group cat-release">
+          <h3 class="hm-group-name" id="hm-tools-release"><span class="hm-dot" aria-hidden="true"></span>Release</h3>
+          <ul aria-labelledby="hm-tools-release">
+            <li class="hm-tool is-owner">
+              <span class="hm-tile" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 11h13"/><path d="M8 14.5v-12M4.5 6L8 2.5 11.5 6"/></svg></span>
+              <span class="hm-tool-id"><span class="hm-tool-name">Promote</span> <span class="hm-owner">Owner only</span></span>
+              <span class="hm-io"><span class="hm-io-label">Takes</span> a run’s checkpoint</span>
+              <span class="hm-io"><span class="hm-io-label">Gives</span> the live checkpoint, unless it scores lower</span>
+            </li>
+            <li class="hm-tool">
+              <span class="hm-tile" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 1.5v3M10.5 1.5v3"/><path d="M3.5 4.5h9V7a4.5 4.5 0 0 1-9 0z"/><path d="M8 11.5v3"/></svg></span>
+              <span class="hm-tool-id"><span class="hm-tool-name">Serve</span></span>
+              <span class="hm-io"><span class="hm-io-label">Takes</span> the live checkpoint</span>
+              <span class="hm-io"><span class="hm-io-label">Gives</span> an OpenAI-compatible endpoint, an embed, an export</span>
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -196,7 +273,7 @@
         <nav aria-labelledby="ov-foot-product">
           <h2 id="ov-foot-product" class="ov-foot-title">Product</h2>
           <ul>
-            <li><a href="/#sequence">The sequence</a></li>
+            <li><a href="/#tools">Tools</a></li>
             <li><a href="/#request">Request access</a></li>
             <li><a href="/blog/">Blog</a></li>
           </ul>
