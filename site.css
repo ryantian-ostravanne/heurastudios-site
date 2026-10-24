@@ -229,27 +229,21 @@ button, input { font: inherit; color: inherit; }
   .hm-toggle { grid-row: 3; grid-column: 1; justify-self: start; margin-top: 12px; }
 }
 
-/* the tools: the Studio's own palette (its icons, its very light group colors, the owner's tools on dark tiles), each
-   tool with what it takes and what it gives. In columns while the panel is wide; on a phone each row says Takes and
-   Gives itself (the labels are always there for screen readers). */
+/* the tools: the Studio's own tools (its schematic icons on plain hairline tiles, the owner's on dark tiles; a group's
+   very light color is only its dot), each with what it takes and what it gives. In columns while the panel is wide; on
+   a phone each row says Takes and Gives itself (the labels are always there for screen readers). */
 :root {
-  --tile-ink: #1d1d1f; --owner: #1d1d1f; --owner-ink: #f5f5f7;
-  --tile-signal: #e5f2ff; --dot-signal: #9cc2ea; --glyph-signal: #cbe1f8;
-  --tile-train: #f2edfe; --dot-train: #c4b4e5; --glyph-train: #e2d9f5;
-  --tile-release: #f9efdf; --dot-release: #d6b98a; --glyph-release: #ecdcc1;
+  --owner: #1d1d1f; --owner-ink: #f5f5f7;
+  --dot-signal: #9cc2ea; --dot-train: #c4b4e5; --dot-release: #d6b98a;
 }
 :root[data-theme="dark"] {
-  --tile-ink: #ededf0; --owner: #f5f5f7; --owner-ink: #1d1d1f;
-  --tile-signal: #26354a; --dot-signal: #5f86b3; --glyph-signal: #2f4561;
-  --tile-train: #322a46; --dot-train: #8574b0; --glyph-train: #43385e;
-  --tile-release: #3d3324; --dot-release: #a8895a; --glyph-release: #5a4a33;
+  --owner: #f5f5f7; --owner-ink: #1d1d1f;
+  --dot-signal: #5f86b3; --dot-train: #8574b0; --dot-release: #a8895a;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --tile-ink: #ededf0; --owner: #f5f5f7; --owner-ink: #1d1d1f;
-    --tile-signal: #26354a; --dot-signal: #5f86b3; --glyph-signal: #2f4561;
-    --tile-train: #322a46; --dot-train: #8574b0; --glyph-train: #43385e;
-    --tile-release: #3d3324; --dot-release: #a8895a; --glyph-release: #5a4a33;
+    --owner: #f5f5f7; --owner-ink: #1d1d1f;
+    --dot-signal: #5f86b3; --dot-train: #8574b0; --dot-release: #a8895a;
   }
 }
 /* beside the panel on a wide screen, the heading and the key stay in view while the eleven rows go by */
@@ -276,18 +270,12 @@ button, input { font: inherit; color: inherit; }
 .cat-release .hm-dot { background: var(--dot-release); }
 .hm-tool { align-items: start; padding: 12px 0; border-top: 1px solid var(--rule); }
 .hm-tile {
-  display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 7px;
-  color: var(--tile-ink);
+  display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px;
+  border: 1px solid var(--rule); background: var(--page); color: var(--ink);
 }
 .hm-tile svg { display: block; }
-.cat-signal .hm-tile { background: var(--tile-signal); }
-.cat-train .hm-tile { background: var(--tile-train); }
-.cat-release .hm-tile { background: var(--tile-release); }
-.hm-tool.is-owner .hm-tile { background: var(--owner); }
-.cat-signal .is-owner .hm-tile { color: var(--glyph-signal); }
-.cat-train .is-owner .hm-tile { color: var(--glyph-train); }
-.cat-release .is-owner .hm-tile { color: var(--glyph-release); }
-.hm-tool.is-soon .hm-tile { opacity: .55; }
+.hm-tool.is-owner .hm-tile { border-color: var(--owner); background: var(--owner); color: var(--owner-ink); }
+.hm-tool.is-soon .hm-tile { color: var(--ink-2); }
 .hm-tool-id { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: 28px; }
 .hm-tool-name { font-size: 16px; font-weight: 700; line-height: 1.4; letter-spacing: -.005em; }
 .hm-soon { padding: 1px 7px; border-radius: 6px; background: var(--page); font-size: 12px; line-height: 18px; color: var(--ink-2); white-space: nowrap; }
@@ -312,12 +300,16 @@ button, input { font: inherit; color: inherit; }
   }
 }
 
-/* what it does, and what it doesn't yet: two plain lists */
-.hm-claims { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px clamp(32px, 5vw, 80px); }
-.hm-claims h3 { padding-bottom: 14px; border-bottom: 1px solid var(--ink); font-size: 17px; font-weight: 700; line-height: 1.45; }
-.hm-claims li { padding: 14px 0 15px; border-bottom: 1px solid var(--line); font-size: 16px; line-height: 1.5; text-wrap: pretty; }
-.hm-claims code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .9em; }
-@media (max-width: 759px) { .hm-claims { grid-template-columns: minmax(0, 1fr); } }
+/* the specifications: one row per part, its name and exactly what it is */
+.hm-specs > div {
+  display: grid; grid-template-columns: minmax(0, 9em) minmax(0, 1fr); column-gap: 24px;
+  padding: 14px 0 15px; border-top: 1px solid var(--line);
+}
+.hm-specs > div:last-child { border-bottom: 1px solid var(--line); }
+.hm-specs dt { font-size: 15px; font-weight: 700; line-height: 1.5; }
+.hm-specs dd { font-size: 16px; line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
+.hm-specs code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .9em; }
+@media (max-width: 559px) { .hm-specs > div { grid-template-columns: minmax(0, 1fr); row-gap: 4px; } }
 
 /* Request access */
 :root { --bad: #b42318; } /* 6.5:1 on the page */
