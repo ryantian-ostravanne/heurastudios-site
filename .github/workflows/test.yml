@@ -1,0 +1,27 @@
+# Runs every test on each push and pull request.
+name: Tests
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Jekyll 3.10 (the version GitHub Pages runs)
+        run: gem install 'jekyll:3.10.0' kramdown-parser-gfm
+      - name: Install Node deps and Chromium
+        run: npm ci && npx playwright install --with-deps chromium
+      - name: Install Python deps for _tools/make-logo.py (the logo test reads its drawing)
+        run: pip install pillow playwright
+
+      - run: npm test
