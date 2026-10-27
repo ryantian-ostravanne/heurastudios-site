@@ -30,11 +30,16 @@ and Log in, for teams that have access, is beside its form, not in a header or f
   Script project they're pasted into one file. The sheet's columns: Joined at, Email, Company, Came from, Name, Role,
   What they will specialize (the last three only from Request access). After pasting a new version, run `setup()` once
   (it adds missing header cells), then Deploy > Manage deployments > Edit > Version: New version (same /exec URL).
-- `favicon.ico`, `favicon.svg`, `favicon-32.png`, `icon-512.png`, `apple-touch-icon.png`: the logo mark (an ink
-  square with Heura orange through its middle third, as in the header) for tabs, bookmarks, search results and
-  home screens; the SVG turns light in dark mode like the header's. `og-image.png`: the 1200x630 card a shared
-  link shows (the logo, the headline and a frame of the recording). Every page names the site Heura Studios for link
-  previews (`og:site_name`), and the home page for search results (WebSite data).
+- The logo (since Oct 26, 2026): five pipeline wires, each plugged in on the left; the outer two run straight and the
+  next two dip into the middle wire, so three run as one bundle through the middle, then split again. Black and white
+  only. The header and footer draw it inline (`.ov-mark`, in the ink's color, so it turns light in dark mode).
+- `favicon.ico`, `favicon.svg`, `favicon-32.png`, `icon-512.png`, `apple-touch-icon.png`: the logo mark for tabs,
+  bookmarks, search results and home screens. The SVG is the bare mark, black, white in dark mode; the others are the
+  mark in white on a black tile, so they show on light and dark tab bars alike (`apple-touch-icon.png` is full bleed:
+  Apple rounds the corners). `og-image.png`: the 1200x630 card a shared link shows (the logo, the headline and a frame
+  of the recording). Every page names the site Heura Studios for link previews (`og:site_name`), and the home page for
+  search results (WebSite data). The icons and the header's mark come from one drawing: `python3 _tools/make-logo.py`
+  (`--card` also puts the mark into the card, in place of the one there).
 - `CNAME`: GitHub Pages serves this repo at heurastudios.com. Pages doesn't publish `_` folders.
 - The blog (`/blog/`): GitHub Pages builds the repo with Jekyll, and only the blog uses it. Posts are Markdown in
   `_posts/`; the list is `blog/index.html`; both use `_layouts/` (`base.html`: the header and footer; `post.html`).
