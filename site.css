@@ -1,10 +1,8 @@
-/* heurastudios.com: one stylesheet for every page.
-   Type: Cantarell for every word, the headlines and leads (var(--serif)) as well as the rest (var(--sans)), in the two
-   weights it has: 400, and 700 for the logo and the bold labels.
-   Color: black ink on a white page and one grey for panels; the logo is the ink too (black and white only).
-   Every color is a token, light by default, dark under html[data-theme="dark"] (set before the first paint by the
-   inline script in each page's <head>) or, with JavaScript off, under the system's dark setting. The tokens are
-   registered so that changing the appearance cross-fades every color. */
+/* heurastudios.com — shared by every page: color tokens (light/dark/high contrast), base, type, buttons,
+   header, sections and footer. Page-specific styles: home.css, legal.css, blog.css, waitlist/waitlist.css.
+   Font: Cantarell everywhere (400, and 700 for bold). Colors are black and white only; every color is a token.
+   Dark mode: html[data-theme="dark"] (set by the inline script in _includes/head.html), or the system setting
+   when JS is off. Tokens are registered with @property so a theme switch can cross-fade them. */
 
 @property --page { syntax: '<color>'; inherits: true; initial-value: #ffffff; }
 @property --panel { syntax: '<color>'; inherits: true; initial-value: #f3f3f3; }
@@ -61,6 +59,10 @@
   transition: --page .25s ease, --panel .25s ease, --ink .25s ease, --ink-2 .25s ease, --line .25s ease, --rule .25s ease,
     --ring .25s ease, --edge .25s ease, --field .25s ease, --foot-edge .25s ease;
 }
+/* error red, for invalid fields: 6.5:1 on the page (light), 9.4:1 (dark) */
+:root { --bad: #b42318; }
+:root[data-theme="dark"] { --bad: #ff8a80; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bad: #ff8a80; } }
 
 /* ---- base */
 *, *::before, *::after { box-sizing: border-box; }
@@ -84,17 +86,8 @@ button, input { font: inherit; color: inherit; }
 ::selection { background: var(--ink); color: var(--page); }
 .ov-wrap { width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 var(--gutter); }
 
-/* a picture made in each appearance: only the one that matches shows */
-.ov-for-dark { display: none; }
-:root[data-theme="dark"] .ov-for-light { display: none; }
-:root[data-theme="dark"] .ov-for-dark { display: block; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) .ov-for-light { display: none; }
-  :root:not([data-theme]) .ov-for-dark { display: block; }
-}
-
 /* ---- type */
-/* sized for Cantarell, a little wider than the serif before it: "company’s own AI." keeps to one line beside the lead */
+/* --serif and --sans are both Cantarell; the names are kept so headings and body can diverge later */
 .ov-display {
   font-family: var(--serif); font-weight: 400; font-size: clamp(40px, 4.4vw + 16px, 76px);
   line-height: 1.02; letter-spacing: -.022em; text-wrap: balance;
@@ -173,8 +166,6 @@ button, input { font: inherit; color: inherit; }
 }
 .ov-skip:focus { transform: none; outline: 2px solid var(--ink); outline-offset: 2px; }
 
-.ov-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
-
 /* ---- sections */
 .ov-section { margin-top: clamp(96px, 11vw, 168px); scroll-margin-top: calc(var(--header) + 32px); }
 .ov-head { max-width: 760px; }
@@ -186,204 +177,6 @@ button, input { font: inherit; color: inherit; }
   .ov-split { grid-template-columns: minmax(0, 1fr); }
   .ov-split > .ov-head + * { margin-top: clamp(32px, 5vw, 48px); }
 }
-
-/* ---- the home page. Quiet on purpose: the recording is the one thing that moves. */
-/* the hero: the headline on the left, the lead and the buttons beside it */
-.hm-hero { padding-top: clamp(48px, 8vw, 120px); }
-.hm-hero-row {
-  display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  column-gap: clamp(32px, 5vw, 80px); align-items: end;
-}
-.hm-title { max-width: 11.5em; }
-@media (max-width: 999px) {
-  .hm-hero-row { grid-template-columns: minmax(0, 1fr); }
-  .hm-hero-side { margin-top: 24px; }
-}
-
-/* the recording: a run in Heura Studios, in a thin frame */
-.hm-run { margin-top: clamp(48px, 7vw, 96px); }
-.hm-frame {
-  position: relative; overflow: hidden; aspect-ratio: 1440 / 900;
-  border-radius: clamp(8px, 1.1vw, 14px); box-shadow: 0 0 0 1px var(--ring);
-  /* the recording's first frame, for the appearance in use, until the video has one of its own */
-  background: var(--panel) url("/img/pipeline-run.webp") center / cover no-repeat;
-}
-:root[data-theme="dark"] .hm-frame { background-image: url("/img/pipeline-run-dark.webp"); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme]) .hm-frame { background-image: url("/img/pipeline-run-dark.webp"); } }
-.hm-video { display: block; width: 100%; height: 100%; object-fit: cover; }
-/* on a phone, the Studio recorded at a phone's size (390 x 600), and its own first frame */
-@media (max-width: 599px) {
-  .hm-frame { aspect-ratio: 390 / 600; background-image: url("/img/pipeline-run-phone.webp"); }
-  :root[data-theme="dark"] .hm-frame { background-image: url("/img/pipeline-run-phone-dark.webp"); }
-}
-@media (max-width: 599px) and (prefers-color-scheme: dark) {
-  :root:not([data-theme]) .hm-frame { background-image: url("/img/pipeline-run-phone-dark.webp"); }
-}
-/* under it, the caption, and Pause beside it (below it on a phone): a sibling, so it's no part of the caption */
-.hm-film { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 32px; }
-.hm-frame { grid-column: 1 / -1; }
-.hm-caption { grid-row: 2; grid-column: 1; max-width: 46em; margin-top: 14px; font-size: 15px; line-height: 1.5; color: var(--ink-2); }
-.hm-toggle {
-  grid-row: 2; grid-column: 2; align-self: start; margin-top: 6px;
-  display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px;
-  border: 0; border-radius: 999px; background: var(--panel); color: var(--ink); box-shadow: inset 0 0 0 1px var(--edge);
-  font: inherit; font-size: 15px; line-height: 1; cursor: pointer;
-}
-.hm-toggle:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.hm-toggle[hidden] { display: none; }
-@media (max-width: 599px) {
-  .hm-film { grid-template-columns: minmax(0, 1fr); }
-  .hm-toggle { grid-row: 3; grid-column: 1; justify-self: start; margin-top: 12px; }
-}
-
-/* the tools: the Studio's own tools (its schematic icons on plain hairline tiles, the owner's on dark tiles; a group's
-   very light color is only its dot), each with what it takes and what it gives. In columns while the panel is wide; on
-   a phone each row says Takes and Gives itself (the labels are always there for screen readers). */
-:root {
-  --owner: #1d1d1f; --owner-ink: #f5f5f7;
-  --dot-signal: #9cc2ea; --dot-train: #c4b4e5; --dot-release: #d6b98a;
-}
-:root[data-theme="dark"] {
-  --owner: #f5f5f7; --owner-ink: #1d1d1f;
-  --dot-signal: #5f86b3; --dot-train: #8574b0; --dot-release: #a8895a;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --owner: #f5f5f7; --owner-ink: #1d1d1f;
-    --dot-signal: #5f86b3; --dot-train: #8574b0; --dot-release: #a8895a;
-  }
-}
-/* beside the panel on a wide screen, the heading and the key stay in view while the eleven rows go by */
-@media (min-width: 900px) {
-  #tools .ov-head { position: sticky; top: calc(var(--header) + 32px); }
-}
-.hm-tools {
-  container: tools / inline-size; padding: clamp(20px, 2.6vw, 32px) clamp(18px, 2.6vw, 32px) clamp(12px, 1.6vw, 20px);
-  border: 1px solid var(--edge); border-radius: clamp(16px, 1.8vw, 24px); background: var(--panel);
-}
-.hm-tools-cols, .hm-tool {
-  display: grid; grid-template-columns: 28px minmax(0, 9.5em) minmax(0, 1fr) minmax(0, 1fr); column-gap: 16px;
-}
-.hm-tools-cols { margin-bottom: 4px; font-size: 13px; line-height: 1.4; color: var(--ink-2); }
-.hm-tools-cols span:first-child { grid-column: 3; }
-.hm-tool-group + .hm-tool-group { margin-top: 28px; }
-.hm-group-name {
-  display: flex; align-items: center; gap: 8px; padding: 8px 0 6px;
-  font-size: 14px; font-weight: 700; line-height: 1.4; color: var(--ink-2);
-}
-.hm-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; }
-.cat-signal .hm-dot { background: var(--dot-signal); }
-.cat-train .hm-dot { background: var(--dot-train); }
-.cat-release .hm-dot { background: var(--dot-release); }
-.hm-tool { align-items: start; padding: 12px 0; border-top: 1px solid var(--rule); }
-.hm-tile {
-  display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px;
-  border: 1px solid var(--rule); background: var(--page); color: var(--ink);
-}
-.hm-tile svg { display: block; }
-.hm-tool.is-owner .hm-tile { border-color: var(--owner); background: var(--owner); color: var(--owner-ink); }
-.hm-tool.is-soon .hm-tile { color: var(--ink-2); }
-.hm-tool-id { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: 28px; }
-.hm-tool-name { font-size: 16px; font-weight: 700; line-height: 1.4; letter-spacing: -.005em; }
-.hm-soon { padding: 1px 7px; border-radius: 6px; background: var(--page); font-size: 12px; line-height: 18px; color: var(--ink-2); white-space: nowrap; }
-/* the owner's tools: the dark tile says it, and the key beside the heading names it once ("Owner only" is read out on
-   each, for screen readers) */
-.hm-key { display: flex; align-items: center; gap: 8px; margin-top: 20px; font-size: 13px; line-height: 1.4; color: var(--ink-2); }
-.hm-key-tile { flex: none; width: 14px; height: 14px; border-radius: 4px; background: var(--owner); }
-.is-soon .hm-tool-name { color: var(--ink-2); }
-.hm-io { padding-top: 3px; font-size: 15px; line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
-.hm-io-label, .hm-owner {   /* read by screen readers (the labels show on a phone, where there are no column names) */
-  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%);
-  white-space: nowrap; border: 0;
-}
-@container tools (max-width: 559px) {
-  .hm-tools-cols { display: none; }
-  .hm-tool { grid-template-columns: 28px minmax(0, 1fr); row-gap: 6px; }
-  /* the label in its own column, so a wrapped line starts under the words, not under the label */
-  .hm-io { grid-column: 2; display: grid; grid-template-columns: 3.6em minmax(0, 1fr); column-gap: 6px; padding-top: 0; }
-  .hm-io-label {
-    position: static; width: auto; height: auto; margin: 0; overflow: visible; clip-path: none;
-    padding-top: 2px; font-size: 13px; font-weight: 700; color: var(--ink-2);
-  }
-}
-
-/* the specifications: one row per part, its name and exactly what it is */
-.hm-specs > div {
-  display: grid; grid-template-columns: minmax(0, 9em) minmax(0, 1fr); column-gap: 24px;
-  padding: 14px 0 15px; border-top: 1px solid var(--line);
-}
-.hm-specs > div:last-child { border-bottom: 1px solid var(--line); }
-.hm-specs dt { font-size: 15px; font-weight: 700; line-height: 1.5; }
-.hm-specs dd { font-size: 16px; line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
-.hm-specs code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .9em; }
-@media (max-width: 559px) { .hm-specs > div { grid-template-columns: minmax(0, 1fr); row-gap: 4px; } }
-
-/* Request access */
-:root { --bad: #b42318; } /* 6.5:1 on the page */
-:root[data-theme="dark"] { --bad: #ff8a80; } /* 9.4:1 on the page */
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bad: #ff8a80; } }
-.hm-request { padding-bottom: clamp(88px, 10vw, 144px); }
-/* the way in for teams that have access: where Request access leads, not in the header (Ryan, Oct 19) */
-.hm-login { margin-top: 20px; font-size: 16px; line-height: 1.5; color: var(--ink-2); }
-.hm-login a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
-.hm-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
-.hm-field { display: grid; gap: 8px; align-content: start; }
-.hm-field-wide, .hm-error, .hm-submit-row { grid-column: 1 / -1; }
-.hm-field label { font-size: 15px; font-weight: 700; line-height: 1.3; }
-.hm-field input, .hm-field textarea {
-  display: block; width: 100%; margin: 0; padding: 13px 16px; border: 1px solid var(--field); border-radius: 12px;
-  background: var(--page); color: var(--ink); font: inherit; font-size: 17px; line-height: 1.4;
-  transition: border-color .15s ease; -webkit-appearance: none; appearance: none;
-}
-.hm-field input { height: 52px; padding-top: 0; padding-bottom: 0; }
-.hm-field textarea { min-height: 120px; resize: vertical; }
-@media (hover: hover) { .hm-field input:hover, .hm-field textarea:hover { border-color: var(--ink-2); } }
-.hm-field input:focus, .hm-field textarea:focus { outline: 2px solid var(--ink); outline-offset: 2px; border-color: var(--ink-2); }
-/* (after :focus, with the same weight, so a field that needs fixing keeps its red edge while it's being fixed) */
-.hm-field input[aria-invalid="true"], .hm-field textarea[aria-invalid="true"] { border-color: var(--bad); }
-.hm-field input:-webkit-autofill {
-  -webkit-text-fill-color: var(--ink); -webkit-box-shadow: 0 0 0 1000px var(--page) inset; caret-color: var(--ink);
-}
-.hm-hint { font-size: 14px; line-height: 1.45; color: var(--ink-2); }
-.hm-trap { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
-.hm-error { font-size: 15px; font-weight: 700; line-height: 1.45; color: var(--bad); }
-/* empty, it stays in the accessibility tree (so its first message is announced like the rest), out of the grid's flow */
-.hm-error:empty { position: absolute; }
-.hm-submit-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 8px; }
-.hm-submit[disabled] { opacity: .6; cursor: progress; }
-.hm-fine { font-size: 14px; line-height: 1.5; color: var(--ink-2); }
-.hm-fine a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
-.hm-done { padding: clamp(24px, 3vw, 36px); border-radius: clamp(16px, 1.8vw, 24px); background: var(--panel); }
-.hm-done:focus { outline: none; }
-.hm-done-title { font-size: 22px; font-weight: 700; line-height: 1.3; }
-.hm-done p { margin-top: 8px; font-size: 17px; line-height: 1.5; color: var(--ink-2); }
-@media (max-width: 559px) { .hm-form { grid-template-columns: minmax(0, 1fr); } }
-
-/* the chat bubble the sample AI puts on a website: its window (a screenshot) above the bubble (a real button that
-   opens and closes it, like the real one). The panel is the website. Sizes are the widget's own, scaled together:
-   the window 372 wide in a 420 by 536 box, the bubble 56 across, 20 in from the right. */
-.ov-chat { position: relative; overflow: hidden; --chat-pad: clamp(12px, 2.2vw, 32px); }
-.ov-chat-box { position: absolute; top: var(--chat-pad); right: var(--chat-pad); height: calc(100% - 2 * var(--chat-pad)); aspect-ratio: 420 / 536; }
-.ov-chat-card {
-  position: absolute; top: 0; right: 0; width: 100%; height: auto; transform-origin: 95.2% 88.5%;
-  transition: opacity .2s ease, transform .55s cubic-bezier(.2, .9, .25, 1.15);
-}
-.ov-js .ov-chat:not(.is-open) .ov-chat-card {
-  opacity: 0; transform: scale(.5) translateY(6%); transition: opacity .2s ease .06s, transform .3s cubic-bezier(.4, 0, 1, 1);
-}
-.ov-chat-bubble {
-  position: absolute; right: 4.762%; bottom: 0; display: grid; place-items: center; width: 13.333%; aspect-ratio: 1 / 1;
-  margin: 0; padding: 0; border: 1px solid rgba(0, 0, 0, .16); border-radius: 50%; background: #ffc21a; color: #000;
-  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, .45); cursor: pointer; transition: transform .15s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-.ov-chat-bubble::before { content: ""; position: absolute; inset: -12px; border-radius: 50%; } /* bigger to tap than it looks */
-.ov-chat-bubble svg { width: 48%; height: 48%; }
-@media (hover: hover) { .ov-chat-bubble:hover { transform: translateY(-1px); } }
-.ov-chat-bubble:active { transform: scale(.94); }
-.ov-chat-bubble:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
-.ov-chat.is-open .ov-chat-icon-chat,
-.ov-chat:not(.is-open) .ov-chat-icon-down { display: none; }
 
 /* ---- footer: always dark */
 .ov-foot {
@@ -419,20 +212,6 @@ button, input { font: inherit; color: inherit; }
 .ov-seg input:checked + span { background: var(--ink); color: var(--page); }
 .ov-seg input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }
 @media (hover: hover) { .ov-seg input:not(:checked):hover + span { color: var(--ink); } }
-
-/* ---- motion (the waitlist page). Things rise into place once as they come into view (site.js adds .is-in), only
-   under .ov-motion, which that page's head script sets unless Reduce Motion is on: without JavaScript nothing is
-   hidden, and if site.js never runs, everything shows after a moment anyway. The home page sets no .ov-motion. */
-:root { --ease-out: cubic-bezier(.16, 1, .3, 1); }
-.ov-motion [data-reveal] { opacity: 0; transform: translateY(24px); }
-.ov-motion.ov-live [data-reveal] { transition: opacity .8s var(--ease-out) var(--d, 0s), transform 1s var(--ease-out) var(--d, 0s); }
-.ov-motion [data-reveal].is-in { opacity: 1; transform: none; }
-.ov-motion:not(.ov-live) [data-reveal] { animation: ov-show .6s ease 2.5s forwards; }
-@keyframes ov-show { to { opacity: 1; transform: none; } }
-
-@media print {
-  .ov-motion [data-reveal] { opacity: 1 !important; transform: none !important; }
-}
 
 @media (prefers-reduced-motion: reduce) {
   :root.ov-theming { transition: none; }

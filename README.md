@@ -1,86 +1,101 @@
 # heurastudios.com
 
-The Heura Studios site: the home page (post-training for AI-native companies; every call to action is Request access,
-and Log in, for teams that have access, is beside its form, not in a header or footer), the blog, the legal pages, and
-`/waitlist/` for anyone with an old link.
+The Heura Studios marketing site: home page, blog, legal pages and the old `/waitlist/` page. It's a static site
+that GitHub Pages builds with Jekyll 3.10, plus a small Google Apps Script that saves form sign-ups to a Google Sheet.
 
-- `index.html`, `home.js`: the home page (Oct 24, 2026). The hero, a looping screen recording of one run in Heura
-  Studios (light and dark; Pause; with Reduce Motion it waits for Play; off screen it rests), Tools (the Studio's own
-  eleven tools in its three groups, with its schematic icons, the owner's on dark tiles, and what each takes and gives),
-  Specifications (one row per part, saying exactly what it is), and the Request access form. Quiet on purpose: the
-  recording is the one thing that moves. The words follow `claude/heura-studios-positioning.md` in the Heura Studios
-  project.
-- `site.css`, `site.js`: shared by every page: the tokens (light and dark), the header, buttons, the footer and its
-  Appearance setting, the header's rule once the page scrolls, and the waitlist page's reveals and sample chat.
-- `img/pipeline-run.*` and `img/pipeline-run-dark.*`: the recording (H.264 `.mp4`, offered first since every iPhone
-  decodes it itself, and VP9 `.webm`) and its first frame (`.webp`, the poster). `img/pipeline-run-phone.*` and
-  `img/pipeline-run-phone-dark.*`: the same run recorded at a phone's size (390 x 600, drawn at 2x), with taps and
-  swipes; phones get these (the sources' `media`, `(max-width: 599px)`). Recorded from the real Studio with
-  `_tools/record-pipeline.py` (a fresh throwaway Studio with the stand-in model and trainer, a sample model for a
-  made-up shop, "Fernbrook Supply Co."), so they can be recorded again:
-  `python3 _tools/record-pipeline.py <app checkout> img`, and again with `--dark`, `--phone`, and `--phone --dark`.
-- `img/studio-*.webp`: Studio screens from Oct 13 (the waitlist page's sample chat card is `studio-chat-card.webp`).
-- `waitlist/`: the old waitlist form. Its `action` is the Apps Script web app. The home page's Request access form posts
-  to the same script with `kind=request` and three more fields.
-- `privacy/`, `terms/` and `legal.css`: the Privacy Policy and the Terms of Service (Leo's text of Oct 13, 2026,
-  the same words as the Heura Studios app's /privacy and /terms; the training switch reads opt-in), linked from
-  every page's footer and from the forms. Their placeholders ([insert date before publishing], the contact emails,
-  the provider list...) still need filling: they went live with them on Oct 13, 2026.
-- `_backend/`: the Apps Script behind both forms (`core.js` is the logic, `Code.gs` the Google side). In the Apps
-  Script project they're pasted into one file. The sheet's columns: Joined at, Email, Company, Came from, Name, Role,
-  What they will specialize (the last three only from Request access). After pasting a new version, run `setup()` once
-  (it adds missing header cells), then Deploy > Manage deployments > Edit > Version: New version (same /exec URL).
-- The logo (since Oct 26, 2026): five pipeline wires, each plugged in on the left; the outer two run straight and the
-  next two dip into the middle wire, so three run as one bundle through the middle, then split again. Black and white
-  only. The header and footer draw it inline (`.ov-mark`, in the ink's color, so it turns light in dark mode).
-- `favicon.ico`, `favicon.svg`, `favicon-32.png`, `icon-512.png`, `apple-touch-icon.png`: the logo mark for tabs,
-  bookmarks, search results and home screens. The SVG is the bare mark, black, white in dark mode; the others are the
-  mark in white on a black tile, so they show on light and dark tab bars alike (`apple-touch-icon.png` is full bleed:
-  Apple rounds the corners). `og-image.png`: the 1200x630 card a shared link shows (the logo, the headline and a frame
-  of the recording). Every page names the site Heura Studios for link previews (`og:site_name`), and the home page for
-  search results (WebSite data). The icons and the header's mark come from one drawing: `python3 _tools/make-logo.py`
-  (`--card` also puts the mark into the card, in place of the one there).
-- `CNAME`: GitHub Pages serves this repo at heurastudios.com. Pages doesn't publish `_` folders.
-- The blog (`/blog/`): GitHub Pages builds the repo with Jekyll, and only the blog uses it. Posts are Markdown in
-  `_posts/`; the list is `blog/index.html`; both use `_layouts/` (`base.html`: the header and footer; `post.html`).
-  Its look is `blog.css`. Report PDFs are in `reports/`, a post's pictures in `img/blog/`. `_config.yml` keeps
-  `docs/` and this README off the site. Every other page has no front matter, so Jekyll copies it as it is.
+## Quick start
+
+```sh
+gem install 'jekyll:3.10.0' kramdown-parser-gfm webrick   # once
+npm install && npx playwright install chromium            # once, for the tests
+
+npm run serve    # http://localhost:4000, rebuilds on save
+npm test         # backend + page tests
+```
+
+Pushing to `main` deploys (GitHub Pages, about a minute). CI runs `npm test` on every push and pull request.
+
+## Where things are
+
+| Path | What it is |
+| --- | --- |
+| `_layouts/default.html` | The page shell every page uses: `<head>`, header, page content, footer |
+| `_includes/head.html` | Everything in `<head>`: meta and link-preview tags, the theme script, fonts, CSS and JS |
+| `_includes/header.html`, `footer.html`, `logo.html` | The shared header, footer and logo |
+| `_layouts/blog.html`, `post.html` | Blog wrapper and a single post |
+| `index.html` + `home.css` + `home.js` | Home page: hero, screen recording, tools, specs, Request access form |
+| `_data/tools.yml` | The tool rows on the home page (edit copy here, not in the HTML) |
+| `privacy/`, `terms/` + `legal.css` | Privacy Policy and Terms of Service |
+| `waitlist/` | The old waitlist page (kept for old links) |
+| `blog/index.html`, `_posts/`, `blog.css` | Blog list and posts (Markdown) |
+| `site.css`, `site.js` | Shared by every page: color tokens, base styles, header, footer, the Appearance switch |
+| `form.js` | Shared form logic for both forms (validation, posting, error and success messages) |
+| `_backend/` | The Apps Script behind the forms: `core.js` (logic, tested in Node) and `Code.gs` (Google wiring) |
+| `_tests/` | Playwright page tests (run against the Jekyll build) |
+| `_tools/` | Python scripts that make the screen recordings and the logo/icon files |
+| `img/`, `reports/` | Images, recordings, report PDFs |
+| `_config.yml` | Site config, including `form_endpoint` (the Apps Script URL) |
+
+Folders starting with `_` are never published.
+
+## Common changes
+
+- **A page's title, description or link preview:** the front matter at the top of the page (`title`,
+  `description`, and optionally `og_title` / `og_description`). `_includes/head.html` lists every option.
+- **Header, footer or logo:** edit the file in `_includes/` once. Every page picks it up.
+- **A new page:** create `something/index.html` with front matter (`layout: default`, `title`, `description`, and
+  `css:` / `js:` for any page-specific files), then write the page's `<main>…</main>`.
+- **A tool on the home page:** edit `_data/tools.yml`.
+- **The forms' endpoint:** `form_endpoint` in `_config.yml`.
+- **Colors:** tokens at the top of `site.css`. Every color has a light, dark and high-contrast value. The site is
+  black and white only.
+
+## Forms and the sheet
+
+Both forms post to one Apps Script web app (`form_endpoint`). The home page sends `kind=request` and three extra
+fields. With JS, `form.js` posts with `js=1` and shows the JSON result in place. Without JS, the browser posts the
+form and the script answers with a plain page.
+
+The sheet keeps one row per email: Joined at, Email, Company, Came from, Name, Role, What they will specialize.
+Signing up again doesn't add a row. If someone on the waitlist later requests access, the request fills in Name,
+Role and What they will specialize on their existing row. "Came from" is the page's utm query, the page on this
+site that linked them, or the other website that did.
+
+Spam protection: a hidden honeypot field, a limit of 60 new rows a minute, and a leading `'` on any cell that would
+start a spreadsheet formula.
+
+**Deploying a backend change:** paste `core.js` (as a script file named `core`) and `Code.gs` into the Apps Script
+project. Run `setup()` once (it adds any missing header cell), then Deploy > Manage deployments > Edit > Version:
+New version. The `/exec` URL stays the same.
 
 ## Writing a blog post
 
-1. On GitHub, open the repo's `_posts` folder, then **Add file → Create new file**.
-2. Name it with the date and a short name in lowercase with dashes: `2026-10-20-what-we-learned.md`. The post's
-   address is the short name: heurastudios.com/blog/what-we-learned/.
-3. Start the file with these lines (the report line only if there's a PDF), then write the post in Markdown below
-   them: `## Heading`, paragraphs, `- lists`, `**bold**`, `[a link](https://…)`, tables and images.
+1. On GitHub, open `_posts` and choose **Add file > Create new file**.
+2. Name it `YYYY-MM-DD-short-name.md` (lowercase, dashes). It will be at heurastudios.com/blog/short-name/.
+3. Start with these lines. Leave out `report` if there's no PDF. Then write the post in Markdown below them.
 
    ```
    ---
    title: "What we learned from Arche 0.22"
-   description: "One or two sentences: the blog list, search results and link previews show it."
+   description: "One or two sentences. The blog list, search results and link previews show it."
    author: Ryan
    report: /reports/heura-eval-005.pdf
    ---
    ```
 
 4. **Commit changes.** The site updates in about a minute.
-5. A report: open the `reports` folder, **Add file → Upload files**, and name the PDF like the post's report line.
-   A picture for a post: upload it to `img/blog/` and use `![What the picture shows](/img/blog/name.png)`.
+5. For a report, upload the PDF to `reports/` with the name from the `report` line. For a picture, upload it to
+   `img/blog/` and use `![What the picture shows](/img/blog/name.png)`.
 
-If a post's top lines are broken (a missing `---`, or a title with a colon not in quotes), GitHub emails the error and
-the site keeps its last good version. Fix the file and commit again.
+If the front matter is broken (a missing `---`, or a title containing a colon but no quotes), GitHub emails the
+error and the site keeps its last good version. Fix the file and commit again.
 
-## Tests
+## Media and icons
 
-- Backend: `cd _backend && node --test`
-- Pages (headless Chromium through Playwright): `NODE_PATH=$(npm root -g) node --test _tests/*.test.js`.
-  The tests stand in for the Apps Script, so they need no Google setup. The blog's tests build the site with
-  Jekyll 3.10, the version GitHub Pages runs (`gem install jekyll -v 3.10.0 kramdown-parser-gfm`).
-
-## The sheet
-
-Columns: Joined at, Email, Company, Came from, Name, Role, What they will specialize. One row per email (asking again
-doesn't add a row; someone on the waitlist who then requests access gets the request's name, role and use on their row). "Came from" is the page's query (utm tags), the page on this site that sent them, or the other
-website that did (the home page's form sends "/"). Name, Role and What they will specialize come from Request access;
-a waitlist join leaves them blank. Until the new `core.js` and `Code.gs` are deployed, the script saves the first four
-columns of a request and drops the other three.
+- **Screen recording** (`img/pipeline-run*`): one run in the real Studio, in desktop and phone sizes, light and
+  dark, as `.mp4` (H.264, for iPhones) and `.webm`, each with a `.webp` poster. To re-record:
+  `python3 _tools/record-pipeline.py <app checkout> img` with `--dark`, `--phone` and `--phone --dark`. Needs
+  ffmpeg and Playwright for Python.
+- **Logo and icons** (`favicon.*`, `icon-512.png`, `apple-touch-icon.png`, `og-image.png`): all drawn from one
+  drawing in `_tools/make-logo.py`. Run `python3 _tools/make-logo.py` (add `--card` to also update the link-preview
+  card). If the drawing changes, update the inline SVG in `_includes/logo.html` to match. The tests check that.

@@ -1,0 +1,15 @@
+{
+  "name": "heurastudios-site",
+  "private": true,
+  "description": "heurastudios.com: static site on GitHub Pages (Jekyll) + the Apps Script behind its forms",
+  "scripts": {
+    "build": "jekyll build",
+    "serve": "jekyll serve --livereload",
+    "test": "npm run test:backend && npm run test:pages",
+    "test:backend": "cd _backend && node --test",
+    "test:pages": "node --test _tests/*.test.js"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
