@@ -362,8 +362,9 @@ test('Specifications: one row per part, in place of what it does and doesn’t',
   const text = await page.evaluate(() => document.body.innerText);
   for (const gone of ['What it does', 'It doesn’t', 'doesn’t yet']) assert.ok(!text.includes(gone), gone);
   assert.equal(text.split('Operators bring the signal.').length - 1, 1, 'said once, where the tools start');
-  assert.match(await page.locator('#request .ov-section-lead').innerText(),
-    /^Access is for teams whose company has a contract with Ostravanne\. A founder checks every request and replies by email\.$/);
+  // (Ryan, Oct 26: the line under Request access was "just yap": the heading, then Log in, then the form)
+  assert.equal(await page.locator('#request .ov-section-lead').count(), 0);
+  for (const gone of ['contract with Ostravanne', 'A founder checks every request']) assert.ok(!text.includes(gone), gone);
   await close();
 });
 
@@ -376,7 +377,9 @@ test('Request access asks for a name, a work email, a company, a role and what t
     ['What will you specialize?', false]]) {
     assert.equal(await form.getByLabel(label, { exact: true }).evaluate(i => i.required), required, label);
   }
-  assert.match(await page.locator('#request .ov-section-lead').innerText(), /teams whose company has a contract with Ostravanne/);
+  // under the heading comes Log in, nothing else
+  assert.deepEqual(await page.locator('#request .ov-head > *').evaluateAll(es => es.map(e => e.className || e.tagName)),
+    ['ov-h2', 'hm-login']);
   await close();
 });
 
