@@ -79,8 +79,9 @@ test('the mark is the ink: black on the light page, light on the dark one, besid
 });
 
 test('black and white only: no orange in any served page, style or script', () => {
-  const files = ['index.html', 'waitlist/index.html', 'privacy/index.html', 'terms/index.html', '_layouts/base.html',
-    '_layouts/post.html', 'blog/index.html', 'site.css', 'blog.css', 'legal.css', 'waitlist/waitlist.css', 'site.js',
+  const files = ['index.html', 'waitlist/index.html', 'privacy/index.html', 'terms/index.html', '_layouts/default.html',
+    '_layouts/blog.html', '_layouts/post.html', '_includes/head.html', '_includes/header.html',
+    '_includes/footer.html', '_includes/logo.html', 'home.css', 'form.js', 'blog/index.html', 'site.css', 'blog.css', 'legal.css', 'waitlist/waitlist.css', 'site.js',
     'home.js', 'waitlist/waitlist.js', 'favicon.svg'];
   for (const file of files) {
     const text = fs.readFileSync(path.join(ROOT, file), 'utf8');

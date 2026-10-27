@@ -1,5 +1,5 @@
-// Test helpers: a tiny static server for the site folder (or the site as Jekyll builds it), a Jekyll build like
-// GitHub Pages' and a Chromium launcher.
+// Test helpers: a Jekyll build like GitHub Pages', a tiny static server for it and a Chromium launcher.
+// Every page uses Jekyll layouts now, so the tests always serve the built site.
 const http = require('node:http');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -14,7 +14,7 @@ const TYPES = {
   '.webm': 'video/webm', '.mp4': 'video/mp4',
 };
 
-function startServer(root = ROOT) {
+function startServer(root = buildSite()) {
   const server = http.createServer((req, res) => {
     let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
     if (p.endsWith('/')) p += 'index.html';
@@ -30,8 +30,9 @@ function startServer(root = ROOT) {
   }));
 }
 
+// Playwright's own Chromium (npx playwright install chromium), or the one at $CHROMIUM if set.
 function launch() {
-  return chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  return chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
 }
 
 // The site as GitHub Pages publishes it: Jekyll 3.10 (the version Pages runs) builds the blog's posts and pages and
@@ -41,7 +42,7 @@ function jekyll() {
   for (const cmd of tries) {
     try { execFileSync(cmd, ['-v'], { stdio: 'pipe' }); return cmd; } catch (e) { /* the next one */ }
   }
-  throw new Error('The blog tests need Jekyll 3.10: gem install jekyll -v 3.10.0 kramdown-parser-gfm (or set JEKYLL)');
+  throw new Error('The tests need Jekyll 3.10: gem install "jekyll:3.10.0" kramdown-parser-gfm (or set JEKYLL)');
 }
 
 let built = null;

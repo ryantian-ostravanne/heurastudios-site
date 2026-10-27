@@ -28,12 +28,18 @@ test.before(async () => { server = await startServer(); browser = await launch()
 test.after(async () => { await browser.close(); await server.close(); });
 
 test('every page and layout asks Google Fonts for Cantarell, 400 and 700, upright and italic, and for nothing else', () => {
-  const pages = files().filter(f => f.endsWith('.html') && /<head>/.test(read(f)));
-  for (const f of ['index.html', 'waitlist/index.html', 'privacy/index.html', 'terms/index.html', '_layouts/base.html']) {
-    assert.ok(pages.includes(path.normalize(f)), `${f} is a page with a head`);
+  // every page as Jekyll builds it (the <head> is _includes/head.html)
+  const site = buildSite();
+  const built = (rel = '') => fs.readdirSync(path.join(site, rel)).flatMap(name => {
+    const r = path.join(rel, name);
+    return fs.statSync(path.join(site, r)).isDirectory() ? built(r) : r.endsWith('.html') ? [r] : [];
+  });
+  const pages = built();
+  for (const f of ['index.html', 'waitlist/index.html', 'privacy/index.html', 'terms/index.html', 'blog/index.html']) {
+    assert.ok(pages.includes(path.normalize(f)), `${f} is built`);
   }
   for (const f of pages) {
-    const html = read(f);
+    const html = fs.readFileSync(path.join(site, f), 'utf8');
     const links = [...html.matchAll(/<link rel="stylesheet" href="(https:\/\/fonts\.googleapis\.com\/[^"]*)">/g)]
       .map(m => new URL(m[1]));
     assert.equal(links.length, 1, `${f}: one Google Fonts stylesheet`);
