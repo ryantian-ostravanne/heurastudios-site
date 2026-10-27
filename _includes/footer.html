@@ -1,0 +1,46 @@
+{%- comment -%}
+  The footer (always dark): links, contact, copyright and the Appearance setting (System / Light / Dark, run by site.js).
+{%- endcomment -%}
+<footer class="ov-foot">
+  <div class="ov-wrap">
+    <div class="ov-foot-top">
+      <div>
+        {% include logo.html %}
+      </div>
+      <div class="ov-foot-cols">
+        <nav aria-labelledby="ov-foot-product">
+          <h2 id="ov-foot-product" class="ov-foot-title">Product</h2>
+          <ul>
+            <li><a href="/#tools">Tools</a></li>
+            <li><a href="/#request">Request access</a></li>
+            <li><a href="/blog/"{% if page.current == 'blog' %} aria-current="page"{% endif %}>Blog</a></li>
+          </ul>
+        </nav>
+        <nav aria-labelledby="ov-foot-legal">
+          <h2 id="ov-foot-legal" class="ov-foot-title">Legal</h2>
+          <ul>
+            <li><a href="/privacy/"{% if page.current == 'privacy' %} aria-current="page"{% endif %}>Privacy Policy</a></li>
+            <li><a href="/terms/"{% if page.current == 'terms' %} aria-current="page"{% endif %}>Terms of Service</a></li>
+          </ul>
+        </nav>
+        <div>
+          <h2 class="ov-foot-title">Contact</h2>
+          <ul>
+            <li><a href="mailto:ryantian@ostravanne.com,leoli@ostravanne.com,ethanwang@ostravanne.com">Email the founders</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="ov-foot-bottom">
+      <p>© 2026 Ostravanne</p>
+      <div class="ov-appearance">
+        <span id="ov-appearance-label">Appearance</span>
+        <div class="ov-seg" role="radiogroup" aria-labelledby="ov-appearance-label">
+          <label><input type="radio" name="ov-appearance" value="system" checked><span>System</span></label>
+          <label><input type="radio" name="ov-appearance" value="light"><span>Light</span></label>
+          <label><input type="radio" name="ov-appearance" value="dark"><span>Dark</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

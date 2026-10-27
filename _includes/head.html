@@ -1,0 +1,76 @@
+{%- comment -%}
+  Everything inside <head>, for every page. Driven by the page's front matter:
+    title, description     required
+    og_title               link-preview title (default: title)
+    og_description         link-preview text (default: description)
+    css, js                extra stylesheets / scripts after site.css / site.js
+    reveal                 true if the page uses [data-reveal] scroll animations (sets html.ov-motion)
+{%- endcomment -%}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ page.title | escape }} – Heura Studios</title>
+<meta name="description" content="{{ page.description | escape }}">
+<meta name="theme-color" content="#ffffff" data-light="#ffffff" data-dark="#000000">
+{%- comment -%}
+  Runs before the first paint so the page never flashes the wrong theme: the saved choice (localStorage "ov-theme")
+  or the system's. Also marks that JS is on (ov-js) and, on pages with reveal: true, that animations are
+  allowed (ov-motion: not with Reduce Motion).
+{%- endcomment %}
+<script>
+(function (d) {
+  var w = window, theme, meta;
+  try { theme = localStorage.getItem('ov-theme'); } catch (e) {}
+  if (theme !== 'light' && theme !== 'dark') {
+    theme = w.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  d.setAttribute('data-theme', theme);
+  d.classList.add('ov-js');
+{%- if page.reveal %}
+  if (w.matchMedia && matchMedia('(prefers-reduced-motion: no-preference)').matches && 'IntersectionObserver' in w) {
+    d.classList.add('ov-motion');
+  }
+{%- endif %}
+  meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', meta.getAttribute('data-' + theme));
+})(document.documentElement);
+</script>
+
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/icon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+{%- assign og_title = page.og_title | default: page.title -%}
+{%- assign og_description = page.og_description | default: page.description %}
+<meta property="og:type" content="{% if page.layout == 'post' %}article{% else %}website{% endif %}">
+<meta property="og:site_name" content="Heura Studios">
+<meta property="og:url" content="{{ site.url }}{{ page.url }}">
+<meta property="og:title" content="{{ og_title | escape }}">
+<meta property="og:description" content="{{ og_description | escape }}">
+<meta property="og:image" content="https://heurastudios.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Heura Studios. Specialize the base before you ship the agent. Beside it, a model’s pipeline in Heura Studios.">
+{%- if page.layout == 'post' %}
+<meta property="article:published_time" content="{{ page.date | date: '%Y-%m-%d' }}">
+{%- endif %}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ og_title | escape }}">
+<meta name="twitter:description" content="{{ og_description | escape }}">
+<meta name="twitter:image" content="https://heurastudios.com/og-image.png">
+{%- if page.url == '/' %}
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Heura Studios","alternateName":"heurastudios.com","url":"https://heurastudios.com/"}</script>
+{%- endif %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cantarell:ital,wght@0,400;0,700;1,400;1,700&display=swap">
+<link rel="stylesheet" href="/site.css">
+{%- for href in page.css %}
+<link rel="stylesheet" href="{{ href }}">
+{%- endfor %}
+<script src="/site.js" defer></script>
+{%- for src in page.js %}
+<script src="{{ src }}" defer></script>
+{%- endfor %}
