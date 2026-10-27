@@ -1,8 +1,8 @@
-// Heura waitlist (heurastudios.com): the logic, kept free of Google services so it runs in Apps Script
-// (pasted in as the "core" script file) and in Node tests alike. Code.gs wires it to the sheet.
+// The forms' backend logic, free of Google services so it runs both in Apps Script (as the "core" script file)
+// and in Node tests. Code.gs wires it to the sheet.
 
-// (Name, Role and What they will specialize come from the home page's Request access form; a waitlist join leaves
-// them blank. New columns go at the end, so the rows already in the sheet keep their places.)
+// Sheet columns. Name, Role and What they will specialize come only from Request access (a waitlist join leaves
+// them blank). Add new columns at the end so existing rows keep their places.
 var WAITLIST_HEADER = ['Joined at', 'Email', 'Company', 'Came from', 'Name', 'Role', 'What they will specialize'];
 var LIMITS = { email: 254, company: 100, from: 200, name: 100, role: 100, use: 1000 };
 var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

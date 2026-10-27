@@ -1,12 +1,14 @@
 /** @OnlyCurrentDoc */
-// Heura waitlist and Request access (heurastudios.com): Apps Script entry points. The logic lives in the "core" script
-// file (core.js). After pasting a new version, run setup() once: it adds any header cell that's missing.
-// The script is bound to the "Heura waitlist" sheet, and @OnlyCurrentDoc keeps its permission to that one sheet.
-// Setup: run setup() once from the editor, then Deploy > New deployment > Web app (Execute as: Me, Who has
-// access: Anyone) and put the /exec URL in data-endpoint on the form in waitlist/index.html. To ship a change:
-// save, then Deploy > Manage deployments > Edit > Version: New version, which keeps the same /exec URL.
+// Google Apps Script entry points for the site's two forms (waitlist + Request access). Bound to the
+// "Heura waitlist" sheet; @OnlyCurrentDoc limits its permissions to that one sheet. The logic is in core.js
+// (paste it in as a second script file named "core"); this file wires it to the sheet.
+//
+// First deploy: run setup(), then Deploy > New deployment > Web app (Execute as: Me, Who has access: Anyone),
+//   and put the /exec URL in form_endpoint in _config.yml.
+// Ship a change: paste, run setup() (adds any missing header cell), then
+//   Deploy > Manage deployments > Edit > Version: New version (keeps the same /exec URL).
 
-var JOINS_PER_MINUTE = 60;   // past this, joins are turned away until the next minute (a flood from a bot)
+var JOINS_PER_MINUTE = 60;   // rate limit: more new rows than this in a minute are turned away (bot floods)
 
 function sheet_() {
   return SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
@@ -71,8 +73,8 @@ function page_(title, body) {
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
-// The waitlist page posts here with js=1 and reads the JSON answer. Without JavaScript the form posts here
-// directly, so the person gets a plain page instead.
+// Both forms post here. With js=1 (form.js) the answer is JSON; without JavaScript the browser posts the form
+// itself, so the answer is a plain page.
 function doPost(e) {
   var p = (e && e.parameter) || {};
   var result;
