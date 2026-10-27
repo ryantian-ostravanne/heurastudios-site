@@ -1,7 +1,9 @@
 // Ryan, Oct 14, 2026: "change the website name into heura studios with an S and add the logo to the thing where you
 // see the link". A browser tab, a bookmark and a search result show the site's icon; a shared link's preview shows
-// the site's name and a picture. All of them are the Heura Studios logo and name: the ink square with the orange
-// band through its middle, as in the header.
+// the site's name and a picture. All of them are the Heura Studios logo and name. The logo since Oct 26, 2026 ("make
+// that our company logo now"): five pipeline wires plugged in on the left, three running as one bundle through the
+// middle, black and white only. favicon.svg is the bare mark (white in dark mode); the other icons are the mark in
+// white on a black tile, so they show on light and dark tab bars alike.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -49,33 +51,48 @@ test('the icon files have the sizes their links promise, and the card is 1200 x 
   assert.deepEqual(pngSize('icon-512.png'), [512, 512]);
   assert.deepEqual(pngSize('apple-touch-icon.png'), [180, 180]);
   assert.deepEqual(pngSize('og-image.png'), [1200, 630]);
-  assert.match(fs.readFileSync(path.join(ROOT, 'favicon.svg'), 'utf8'), /^<svg [^>]*viewBox="0 0 24 24"/);
+  assert.match(fs.readFileSync(path.join(ROOT, 'favicon.svg'), 'utf8'), /^<svg [^>]*viewBox="10 10 100 100"/);
 });
 
-test('each icon is the logo: an ink square with Heura orange through its middle third', async () => {
+// Each icon drawn at 96 x 96: the middle wire runs through the centre; between the top wire and the second one (which
+// dips into the bundle there) is a gap; a tile's top edge is black.
+async function draw(page, src) {
+  return page.evaluate(async src => {
+    const img = new Image();
+    img.src = src;
+    await img.decode();
+    const c = document.createElement('canvas');
+    c.width = c.height = 96;
+    const g = c.getContext('2d');
+    g.drawImage(img, 0, 0, 96, 96);
+    const at = (x, y) => Array.from(g.getImageData(x, y, 1, 1).data);
+    return { wire: at(48, 48), gap: at(48, 28), plug: at(7, 48), edge: at(48, 2) };
+  }, src);
+}
+const white = ([r, g, b, a]) => r > 200 && g > 200 && b > 200 && a > 200;
+const black = ([r, g, b, a]) => r < 40 && g < 40 && b < 40 && a > 200;
+
+test('each icon is the logo: the wires in white on a black tile, and favicon.svg the bare mark', async () => {
   const ctx = await browser.newContext({ colorScheme: 'light' });
   const page = await ctx.newPage();
   await page.goto(server.url + '/');
-  for (const file of ['favicon.svg', 'favicon.ico', 'favicon-32.png', 'icon-512.png', 'apple-touch-icon.png']) {
-    const px = await page.evaluate(async src => {
-      const img = new Image();
-      img.src = src;
-      await img.decode();
-      const c = document.createElement('canvas');
-      c.width = c.height = 96;
-      const g = c.getContext('2d');
-      g.drawImage(img, 0, 0, 96, 96);
-      const at = (x, y) => Array.from(g.getImageData(x, y, 1, 1).data);
-      return { middle: at(48, 48), top: at(48, 20), bottom: at(48, 76) };
-    }, `${server.url}/${file}`);
-    const [r, gr, b] = px.middle;
-    assert.ok(r > 225 && gr > 50 && gr < 120 && b < 60, `${file}: orange in the middle, got ${px.middle}`);
-    for (const edge of ['top', 'bottom']) {
-      const [er, eg, eb, ea] = px[edge];
-      assert.ok(er < 40 && eg < 40 && eb < 40 && ea > 200, `${file}: ink at the ${edge}, got ${px[edge]}`);
-    }
+  for (const file of ['favicon.ico', 'favicon-32.png', 'icon-512.png', 'apple-touch-icon.png']) {
+    const px = await draw(page, `${server.url}/${file}`);
+    assert.ok(white(px.wire), `${file}: the middle wire is white, got ${px.wire}`);
+    assert.ok(black(px.gap), `${file}: the tile shows between the wires, got ${px.gap}`);
+    assert.ok(black(px.edge), `${file}: the tile is black at its edge, got ${px.edge}`);
   }
+  const svg = await draw(page, `${server.url}/favicon.svg`);
+  assert.ok(black(svg.wire), `favicon.svg: the middle wire is black, got ${svg.wire}`);
+  assert.ok(black(svg.plug), `favicon.svg: the middle wire's plug is black, got ${svg.plug}`);
+  assert.ok(svg.gap[3] < 30, `favicon.svg: nothing between the wires, got ${svg.gap}`);
   await ctx.close();
+  const dark = await browser.newContext({ colorScheme: 'dark' });
+  const dpage = await dark.newPage();
+  await dpage.goto(server.url + '/');
+  const d = await draw(dpage, `${server.url}/favicon.svg`);
+  assert.ok(white(d.wire), `favicon.svg in dark mode: the middle wire is white, got ${d.wire}`);
+  await dark.close();
 });
 
 test('every page shares as Heura Studios: the site name, the card with its size and words, a large card on X', async () => {
