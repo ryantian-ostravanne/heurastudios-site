@@ -2,10 +2,6 @@
    which pops open after the page loads.
    Builds on site.css: the tokens (light and dark), the header, buttons, panels and the footer. */
 
-:root { --bad: #b42318; } /* 6.5:1 on the page */
-:root[data-theme="dark"] { --bad: #ff8a80; } /* 9.4:1 on the page */
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bad: #ff8a80; } }
-
 .wl-main { padding: clamp(32px, 6vw, 88px) 0 clamp(72px, 9vw, 128px); }
 .wl-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(40px, 6vw, 96px); align-items: center; }
 .wl-panel { width: 100%; max-width: 460px; }
@@ -45,7 +41,7 @@
 .wl-done:focus { outline: none; }
 .wl-home { margin-top: 28px; }
 
-/* the sample chat, in the corner of the panel (styles in site.css, .ov-chat) */
+/* the sample chat panel (its widget styles are at the bottom of this file) */
 .wl-art { height: clamp(520px, 48vw, 640px); }
 
 /* narrower screens: the form alone */
@@ -53,4 +49,43 @@
   .wl-grid { grid-template-columns: minmax(0, 1fr); }
   .wl-panel { max-width: 520px; }
   .wl-art { display: none; }
+}
+
+/* ---- the sample chat: the chat bubble the sample AI puts on a website: its window (a screenshot) above the bubble (a real button that
+   opens and closes it, like the real one). The panel is the website. Sizes are the widget's own, scaled together:
+   the window 372 wide in a 420 by 536 box, the bubble 56 across, 20 in from the right. */
+.ov-chat { position: relative; overflow: hidden; --chat-pad: clamp(12px, 2.2vw, 32px); }
+.ov-chat-box { position: absolute; top: var(--chat-pad); right: var(--chat-pad); height: calc(100% - 2 * var(--chat-pad)); aspect-ratio: 420 / 536; }
+.ov-chat-card {
+  position: absolute; top: 0; right: 0; width: 100%; height: auto; transform-origin: 95.2% 88.5%;
+  transition: opacity .2s ease, transform .55s cubic-bezier(.2, .9, .25, 1.15);
+}
+.ov-js .ov-chat:not(.is-open) .ov-chat-card {
+  opacity: 0; transform: scale(.5) translateY(6%); transition: opacity .2s ease .06s, transform .3s cubic-bezier(.4, 0, 1, 1);
+}
+.ov-chat-bubble {
+  position: absolute; right: 4.762%; bottom: 0; display: grid; place-items: center; width: 13.333%; aspect-ratio: 1 / 1;
+  margin: 0; padding: 0; border: 1px solid rgba(0, 0, 0, .16); border-radius: 50%; background: #ffc21a; color: #000;
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, .45); cursor: pointer; transition: transform .15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.ov-chat-bubble::before { content: ""; position: absolute; inset: -12px; border-radius: 50%; } /* bigger to tap than it looks */
+.ov-chat-bubble svg { width: 48%; height: 48%; }
+@media (hover: hover) { .ov-chat-bubble:hover { transform: translateY(-1px); } }
+.ov-chat-bubble:active { transform: scale(.94); }
+.ov-chat-bubble:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.ov-chat.is-open .ov-chat-icon-chat,
+.ov-chat:not(.is-open) .ov-chat-icon-down { display: none; }
+
+/* ---- reveal on scroll: [data-reveal] elements rise in once (waitlist.js adds .is-in). Only under html.ov-motion
+   (JS on, Reduce Motion off). Fallback: if JS never runs, everything appears after 2.5s anyway. */
+:root { --ease-out: cubic-bezier(.16, 1, .3, 1); }
+.ov-motion [data-reveal] { opacity: 0; transform: translateY(24px); }
+.ov-motion.ov-live [data-reveal] { transition: opacity .8s var(--ease-out) var(--d, 0s), transform 1s var(--ease-out) var(--d, 0s); }
+.ov-motion [data-reveal].is-in { opacity: 1; transform: none; }
+.ov-motion:not(.ov-live) [data-reveal] { animation: ov-show .6s ease 2.5s forwards; }
+@keyframes ov-show { to { opacity: 1; transform: none; } }
+
+@media print {
+  .ov-motion [data-reveal] { opacity: 1 !important; transform: none !important; }
 }
