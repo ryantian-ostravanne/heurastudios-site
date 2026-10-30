@@ -1,0 +1,24 @@
+{%- comment -%}
+  Decoration: the box this sits in (position: relative) as a node on a pipeline. Three wires run in from the screen's
+  left edge to ports 24px left of the box, and one runs out of a port 24px right of it and splits (solid wires carry
+  signal, dashed ones context, as in the Studio). Level with --wires-at in the box (its middle unless set). Hidden
+  unless the page turns it on where there's room (legal.css: the legal pages' titles).
+{%- endcomment -%}
+<span class="ov-wires" aria-hidden="true">
+  <svg class="ov-wires-in" viewBox="0 0 1600 160" focusable="false">
+    <g fill="none" stroke="currentColor" stroke-linecap="round">
+      <path d="M0 20H1380C1480 20 1492 52 1592 52" stroke-width="1.5" opacity=".3"/>
+      <path d="M0 80H1592" stroke-width="2"/>
+      <path d="M0 148H1300C1440 148 1452 108 1592 108" stroke-width="1.5" opacity=".3"/>
+    </g>
+    <circle cx="1592" cy="52" r="4.5"/><circle cx="1592" cy="80" r="4.5"/><circle cx="1592" cy="108" r="4.5"/>
+  </svg>
+  <svg class="ov-wires-out" viewBox="0 0 1600 160" focusable="false">
+    <g fill="none" stroke="currentColor" stroke-linecap="round">
+      <path d="M8 80H1600" stroke-width="2"/>
+      <path d="M8 80C130 80 150 36 272 36H1600" stroke-width="1.5" opacity=".3"/>
+      <path d="M8 80C150 80 172 128 314 128H1600" stroke-width="1.5" opacity=".3" stroke-dasharray="5 6"/>
+    </g>
+    <circle cx="8" cy="80" r="4.5"/>
+  </svg>
+</span>

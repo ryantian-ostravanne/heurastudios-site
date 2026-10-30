@@ -14,6 +14,7 @@
 @property --edge { syntax: '<color>'; inherits: true; initial-value: transparent; }
 @property --field { syntax: '<color>'; inherits: true; initial-value: #8a8a8a; }
 @property --foot-edge { syntax: '<color>'; inherits: true; initial-value: #000000; }
+@property --canvas { syntax: '<color>'; inherits: true; initial-value: #f3f3f3; }
 @property --canvas-dot { syntax: '<color>'; inherits: true; initial-value: #cfcfcf; }
 
 :root {
@@ -27,7 +28,8 @@
   --edge: transparent; /* a panel's outline: only with Increase Contrast */
   --field: #8a8a8a;   /* input borders: 3.4:1 */
   --foot-edge: #000000; /* the footer's top edge: in light it's the footer itself */
-  --canvas-dot: #cfcfcf; /* the Studio canvas's dots (its #cfcfd4, without the blue), in the page's margins */
+  --canvas: #f3f3f3;  /* the Studio's canvas (its #f2f2f4, without the blue) in the page's margins, */
+  --canvas-dot: #cfcfcf; /* and its dots (#cfcfd4) */
   --sans: "Cantarell", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --serif: "Cantarell", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --gutter: clamp(20px, 4vw, 48px);
@@ -38,13 +40,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --page: #000000; --panel: #161616; --ink: #f5f5f5; --ink-2: #a3a3a3; --line: #262626; --rule: #303030;
-    --ring: #2c2c2c; --field: #6e6e6e; --foot-edge: #262626; --canvas-dot: #2c2c2c;
+    --ring: #2c2c2c; --field: #6e6e6e; --foot-edge: #262626; --canvas: #0c0c0c; --canvas-dot: #2c2c2c;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --page: #000000; --panel: #161616; --ink: #f5f5f5; --ink-2: #a3a3a3; --line: #262626; --rule: #303030;
-  --ring: #2c2c2c; --field: #6e6e6e; --foot-edge: #262626; --canvas-dot: #2c2c2c;
+  --ring: #2c2c2c; --field: #6e6e6e; --foot-edge: #262626; --canvas: #0c0c0c; --canvas-dot: #2c2c2c;
   color-scheme: dark;
 }
 /* Increase Contrast: stronger secondary text and rules, and panels get an outline.
@@ -59,7 +61,7 @@
 /* site.js adds this class for a moment when the appearance changes, so only a change cross-fades */
 :root.ov-theming {
   transition: --page .25s ease, --panel .25s ease, --ink .25s ease, --ink-2 .25s ease, --line .25s ease, --rule .25s ease,
-    --ring .25s ease, --edge .25s ease, --field .25s ease, --foot-edge .25s ease, --canvas-dot .25s ease;
+    --ring .25s ease, --edge .25s ease, --field .25s ease, --foot-edge .25s ease, --canvas .25s ease, --canvas-dot .25s ease;
 }
 /* error red, for invalid fields: 6.5:1 on the page (light), 9.4:1 (dark) */
 :root { --bad: #b42318; }
@@ -89,21 +91,30 @@ button, input { font: inherit; color: inherit; }
 ::selection { background: var(--ink); color: var(--page); }
 .ov-wrap { width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 var(--gutter); }
 
-/* the margins: the Studio's canvas, its dot grid (20px apart, as at 100%), on the left and the right of the column.
-   It stays still while the page scrolls over it: fixed to the screen, under everything, so the header and the footer
-   (each with a background of its own) cover it. It fades out before the column (.ov-wrap's words and panels start at
-   --margin), so nothing is ever read over it, and it only shows where a screen leaves room beside the column. */
+/* the margins: the Studio's canvas (its grey, and its dot grid 20px apart, as at 100%) on the left and the right, and
+   the column a sheet on it: the page's color with an edge, from under the header down to the footer, so the middle
+   stands out. The canvas stays still while the page scrolls over it: fixed to the screen, under everything (the
+   header and the footer have backgrounds of their own). Only where a screen leaves room beside the column. */
 @media (min-width: 1360px) {
   body::before {
-    --margin: max(var(--gutter), 50% - 592px);
     content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-    background: radial-gradient(circle, var(--canvas-dot) 1px, transparent 1.4px) center top / 20px 20px;
-    -webkit-mask-image: linear-gradient(to right, #000 calc(var(--margin) - 48px), transparent calc(var(--margin) - 20px),
-      transparent calc(100% - var(--margin) + 20px), #000 calc(100% - var(--margin) + 48px));
-    mask-image: linear-gradient(to right, #000 calc(var(--margin) - 48px), transparent calc(var(--margin) - 20px),
-      transparent calc(100% - var(--margin) + 20px), #000 calc(100% - var(--margin) + 48px));
+    background: radial-gradient(circle, var(--canvas-dot) 1px, transparent 1.4px) center top / 20px 20px var(--canvas);
+  }
+  main { position: relative; isolation: isolate; }
+  main::before {   /* the sheet: as wide as .ov-wrap, its words 48px in from each edge */
+    content: ""; position: absolute; top: 0; bottom: 0; left: calc(50% - 640px); width: 1280px; z-index: -1;
+    background: var(--page); box-shadow: -1px 0 var(--line), 1px 0 var(--line); pointer-events: none;
   }
 }
+
+/* the pipeline's wires (decoration, _includes/wires.html, beside the legal pages' titles): the box they sit in as a
+   node, three ports in on its left and one out on its right, level with --wires-at in it. They run on past the screen's edges, so whatever turns them
+   on clips its overflow (overflow-x: clip); they're off unless something does. */
+.ov-wires { display: none; position: absolute; left: 0; right: 0; top: var(--wires-at, 50%); height: 0; pointer-events: none; color: var(--ink); }
+.ov-wires svg { position: absolute; top: -80px; width: 1600px; height: 160px; }
+.ov-wires-in { right: calc(100% + 16px); }
+.ov-wires-out { left: calc(100% + 16px); }
+.ov-wires circle { fill: currentColor; stroke: var(--page); stroke-width: 2; }
 
 /* ---- type */
 /* --serif and --sans are both Cantarell; the names are kept so headings and body can diverge later */
@@ -197,26 +208,89 @@ button, input { font: inherit; color: inherit; }
   .ov-split > .ov-head + * { margin-top: clamp(32px, 5vw, 48px); }
 }
 
-/* ---- footer: always dark */
+/* ---- footer: always dark, and drawn as a pipeline in the Studio (_includes/footer.html): its sections are nodes on
+   the Studio's dark canvas (its colors: cards #1c1c1e, edges #2a2a30, tiles' edges #3a3a40, wires #6e6e76, dots
+   #2c2c2c), each node's ports level with its name, the wires from one node's out port to the next one's in port. */
 .ov-foot {
-  --page: #000000; --panel: #1f1f1f; --ink: #f5f5f5; --ink-2: #a3a3a3; --line: #2a2a2a;
+  --page: #0c0c0c; --panel: #1f1f1f; --ink: #f5f5f5; --ink-2: #a3a3a3; --line: #2a2a2a;
+  --node: #1c1c1e; --node-edge: #2a2a30; --tile-edge: #3a3a40; --wire: #6e6e76;
   padding: clamp(48px, 6vw, 80px) 0 28px; border-top: 1px solid var(--foot-edge);
-  background: var(--page); color: var(--ink); font-size: 15px; line-height: 1.5;
+  background: radial-gradient(circle, #2c2c2c 1px, transparent 1.4px) center top / 20px 20px, var(--page);
+  color: var(--ink); font-size: 15px; line-height: 1.5;
+  overflow-x: hidden; overflow-x: clip;   /* (the wires at its ends run on past the screen's edges) */
 }
-@media (prefers-contrast: more) { .ov-foot { --ink-2: #d6d6d6; --line: #7a7a7a; } }
-.ov-foot-top { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 40px clamp(32px, 5vw, 80px); }
-.ov-foot-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
-@media (max-width: 559px) { .ov-foot-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.ov-foot-title { font-size: 15px; font-weight: 700; line-height: 1.4; }
-.ov-foot-cols ul { margin-top: 6px; }
-.ov-foot-cols a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink-2); transition: color .15s ease; }
-@media (hover: hover) { .ov-foot-cols a:hover { color: var(--ink); } }
+@media (prefers-contrast: more) { .ov-foot { --ink-2: #d6d6d6; --line: #7a7a7a; --node-edge: #7a7a7a; --wire: #a3a3a3; } }
+
+/* the nodes, in a row, a wire between each two (its cell stretches; the drawing's height is the cells', 1:1) */
+.ov-pipe {
+  display: grid; align-items: start;
+  grid-template-columns: auto minmax(32px, 1fr) auto minmax(32px, 1fr) auto minmax(32px, 1fr) auto;
+}
+.ov-node {
+  position: relative; min-width: 168px; padding: 12px 14px; border: 1px solid var(--node-edge); border-radius: 12px;
+  background: var(--node); color: var(--ink);
+}
+/* the heights they sit at, as on a canvas: the wires' drawings meet the ports there (24px under a node's top) */
+.ov-node.is-brand { --at: 28px; }
+.ov-node.is-legal { --at: 56px; }
+.ov-node.is-contact { --at: 20px; }
+.ov-node { margin-top: var(--at, 0px); }
+/* Heura Studios: an owner's card, dark on light, as the Studio draws the owner's tools */
+.ov-node.is-brand { border-color: #f5f5f7; background: #f5f5f7; color: #1d1d1f; }
+.ov-node .ov-logo { min-height: 24px; gap: 10px; font-size: 14px; }
+.ov-node-head { display: flex; align-items: center; gap: 10px; height: 24px; font-size: 14px; font-weight: 700; line-height: 1; }
+.ov-tile {
+  display: inline-flex; align-items: center; justify-content: center; flex: none; width: 24px; height: 24px;
+  border: 1px solid var(--tile-edge); border-radius: 6px; background: var(--node); color: #ededf0;
+}
+.ov-tile svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: square; stroke-linejoin: miter; }
+.ov-node-lines { margin-top: 6px; }
+.ov-node-lines a { display: flex; align-items: center; min-height: 30px; font-size: 14px; color: var(--ink-2); transition: color .15s ease; }
+.ov-node-lines a[aria-current="page"] { color: var(--ink); }
+@media (hover: hover) { .ov-node-lines a:hover { color: var(--ink); } }
+/* ports: a dot on the card's edge, ringed in the canvas's color (the owner's card: a dark dot) */
+.ov-port {
+  position: absolute; top: 19px; width: 10px; height: 10px; border: 2px solid var(--page); border-radius: 50%;
+  background: var(--ink);
+}
+.ov-port.is-in { left: -6px; }
+.ov-port.is-out { right: -6px; }
+.ov-node.is-brand .ov-port { background: #1d1d1f; }
+/* the wires: solid, the Studio's grey; a faint one, and a dashed one (context, at answer time) */
+.ov-wire { display: block; width: 100%; height: 220px; overflow: visible; }
+.ov-wire path, .ov-edge path { fill: none; stroke: var(--wire); stroke-width: 1.5px; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.ov-wire .is-context { stroke-dasharray: 4px 4px; }
+/* a wire passing a node: straight under (or over) it at its lane's height on the canvas (--lane from the row's top;
+   --at, the node's own height on it). Its ends meet the wires' drawings in the cells on either side. */
+.ov-lane {
+  position: absolute; left: -1px; right: -1px; top: calc(var(--lane) - var(--at, 0px) - 1.75px); height: 0;
+  border-top: 1.5px solid var(--wire); pointer-events: none;
+}
+.ov-lane.is-context { border-top-style: dashed; }
+.ov-edge { position: absolute; top: 4px; width: 1600px; height: 64px; overflow: visible; pointer-events: none; }
+.ov-edge.is-in { right: 100%; }
+.ov-edge.is-out { left: 100%; }
+.ov-edge .is-faint { opacity: .5; }
+.ov-edge .is-context { stroke-dasharray: 4px 4px; }
+
+/* a phone or a tablet: the nodes stack, the wire running down from each one's bottom port to the next one's top */
+@media (max-width: 899px) {
+  .ov-pipe { grid-template-columns: minmax(0, 420px); row-gap: 28px; }
+  .ov-node { margin-top: 0 !important; }
+  .ov-wire, .ov-edge, .ov-lane, .ov-node.is-brand .ov-port.is-in, .ov-node.is-contact .ov-port.is-out { display: none; }
+  .ov-port.is-in { left: 21px; top: -6px; }
+  .ov-port.is-out { left: 21px; right: auto; top: auto; bottom: -6px; }
+  .ov-node:not(.is-brand)::before {
+    content: ""; position: absolute; left: 25.25px; top: -30px; height: 24px; border-left: 1.5px solid var(--wire);
+  }
+  .ov-node-lines a { min-height: 44px; }
+}
+
 .ov-foot-bottom {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 32px;
   margin-top: clamp(48px, 6vw, 80px); padding-top: 24px; border-top: 1px solid var(--line);
   font-size: 14px; color: var(--ink-2);
 }
-@media (max-width: 759px) { .ov-foot-top { grid-template-columns: minmax(0, 1fr); } }
 
 /* the appearance setting: System, Light, Dark. It needs JavaScript, so it only shows with it. */
 .ov-appearance { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }

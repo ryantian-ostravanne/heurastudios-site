@@ -28,7 +28,7 @@ Pushing to `main` deploys (GitHub Pages, about a minute). CI runs `npm test` on 
 | `privacy/`, `terms/` + `legal.css` | Privacy Policy and Terms of Service |
 | `waitlist/` | The old waitlist page (kept for old links) |
 | `blog/index.html`, `_posts/`, `blog.css` | Blog list and posts (Markdown) |
-| `site.css`, `site.js` | Shared by every page: color tokens, base styles, header, footer, the Appearance switch, and the dot grid in the side margins (screens 1360px and wider) |
+| `site.css`, `site.js` | Shared by every page: color tokens, base styles, header, footer, the Appearance switch, the canvas in the side margins and the sheet under the column (screens 1360px and wider) |
 | `form.js` | Shared form logic for both forms (validation, posting, error and success messages) |
 | `_backend/` | The Apps Script behind the forms: `core.js` (logic, tested in Node) and `Code.gs` (Google wiring) |
 | `_tests/` | Playwright page tests (run against the Jekyll build) |
@@ -96,10 +96,15 @@ error and the site keeps its last good version. Fix the file and commit again.
   dark, as `.mp4` (H.264, for iPhones) and `.webm`, each with a `.webp` poster. To re-record:
   `python3 _tools/record-pipeline.py <app checkout> img` with `--dark`, `--phone` and `--phone --dark`. Needs
   ffmpeg and Playwright for Python. Last recorded Oct 29, 2026, from the app at f6764a9.
-- **Side margins:** the Studio canvas's dot grid, left and right of the content column, never behind it, and still
-  while the page scrolls (`body::before` in `site.css`, fixed). On the Privacy Policy, pipeline wires run in to
-  its title and out of it (the inline SVGs in `privacy/index.html`, styled in `legal.css`).
-  `_tests/margins.test.js` checks both.
+- **Side margins and the sheet:** on screens 1360px and wider, the Studio's canvas (its grey and dot grid) fills the
+  margins and stays still while the page scrolls (`body::before` in `site.css`, fixed), and the column is a sheet
+  on it, the page's color with an edge (`main::before`).
+- **Pipeline wires** (`_includes/wires.html`): decoration that makes a box a node on a pipeline, wires running in
+  from the screen's left edge and out past its right edge, beside each legal page's title (from 1100px, `legal.css`).
+- **The footer is a pipeline** (`_includes/footer.html`, styled in `site.css`): its sections are Studio nodes on
+  the Studio's dark canvas, wired in order and across. Wires that pass a node run under or over it (`.ov-lane`);
+  the nodes sit at fixed heights, so moving one means moving its wires' ends too. On a phone the nodes stack.
+  `_tests/margins.test.js` checks all of this.
 - **Logo and icons** (`favicon.*`, `icon-512.png`, `apple-touch-icon.png`, `og-image.png`): all drawn from one
   drawing in `_tools/make-logo.py`. Run `python3 _tools/make-logo.py` (add `--card` to also update the link-preview
   card). If the drawing changes, update the inline SVG in `_includes/logo.html` to match. The tests check that.
