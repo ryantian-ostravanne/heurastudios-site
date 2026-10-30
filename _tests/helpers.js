@@ -54,4 +54,42 @@ function buildSite() {
   return dest;
 }
 
-module.exports = { startServer, launch, buildSite, ROOT };
+// A screenshot's pixels: a PNG as Playwright takes one (8 bits a channel, RGB or RGBA, not interlaced), decoded with
+// nothing but zlib -> { width, height, rgb(x, y) -> [r, g, b] }
+function readPng(buf) {
+  const zlib = require('node:zlib');
+  let pos = 8, width = 0, height = 0, type = 0;
+  const idat = [];
+  while (pos < buf.length) {
+    const len = buf.readUInt32BE(pos), kind = buf.toString('ascii', pos + 4, pos + 8);
+    const data = buf.subarray(pos + 8, pos + 8 + len);
+    if (kind === 'IHDR') {
+      [width, height, type] = [data.readUInt32BE(0), data.readUInt32BE(4), data[9]];
+      if (data[8] !== 8 || data[12] !== 0) throw new Error('readPng: 8-bit, non-interlaced PNGs only');
+    } else if (kind === 'IDAT') idat.push(data);
+    else if (kind === 'IEND') break;
+    pos += 12 + len;
+  }
+  const bpp = { 2: 3, 6: 4 }[type];
+  if (!bpp) throw new Error(`readPng: color type ${type}`);
+  const raw = zlib.inflateSync(Buffer.concat(idat)), stride = width * bpp, px = Buffer.alloc(stride * height);
+  for (let y = 0; y < height; y++) {   // each row's filter undone (PNG spec, 9.2)
+    const f = raw[y * (stride + 1)], src = raw.subarray(y * (stride + 1) + 1, (y + 1) * (stride + 1));
+    const row = px.subarray(y * stride, (y + 1) * stride), up = y ? px.subarray((y - 1) * stride, y * stride) : null;
+    for (let i = 0; i < stride; i++) {
+      const a = i >= bpp ? row[i - bpp] : 0, b = up ? up[i] : 0, c = up && i >= bpp ? up[i - bpp] : 0;
+      let v = src[i];
+      if (f === 1) v += a;
+      else if (f === 2) v += b;
+      else if (f === 3) v += (a + b) >> 1;
+      else if (f === 4) {
+        const p = a + b - c, pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c);
+        v += pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
+      }
+      row[i] = v & 255;
+    }
+  }
+  return { width, height, rgb: (x, y) => { const o = y * stride + x * bpp; return [px[o], px[o + 1], px[o + 2]]; } };
+}
+
+module.exports = { startServer, launch, buildSite, readPng, ROOT };
