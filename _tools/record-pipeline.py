@@ -165,7 +165,9 @@ def desktop_run(pw, ai, name, value):
     ctx.add_cookies([{"name": name, "value": value, "url": URL}])
     ctx.add_init_script(ARROW)
     page = ctx.new_page()
-    page.goto(f"{URL}/studio#/ai/{ai}/overview?node=demonstrate")   # opens on what the run trains on
+    # opens on Fine-tune: what the next run trains on (a selected node shows its delete button in its corner, which
+    # would cover the end of a long name like Demonstrations in the poster frame)
+    page.goto(f"{URL}/studio#/ai/{ai}/overview?node=train")
     page.locator(".pnode").first.wait_for()
     page.wait_for_timeout(600)
 
@@ -200,12 +202,12 @@ def desktop_run(pw, ai, name, value):
 
     node = lambda n: page.locator(f'.pnode[data-node="{n}"]')
     got, stop_cast = capture(ctx, page)
-    page.wait_for_timeout(2200)                                   # the pipeline, and its demonstrations
+    page.wait_for_timeout(2200)                                   # the pipeline, and what the next run trains on
     click_on(node("evaluate"), 0.42, 0.3)                         # what it's scored on, before and after
     page.wait_for_timeout(1500)
     click_on(node("train"), 0.36, 0.14)                           # the next run: its rows
     page.wait_for_timeout(1300)
-    click_on(page.locator(".pinspect").get_by_role("button", name="Start a run"), ms=700)
+    click_on(page.locator(".ppanel").get_by_role("button", name="Start a run"), ms=700)
     page.locator(".prun.is-running").first.wait_for(timeout=10000)
     glide(*center(node("train"), 0.75, 1.25), ms=1100)            # out of the way while it runs
     page.locator(".pnode[data-node=train] .prun:not(.is-running)").wait_for(timeout=60000)
@@ -219,8 +221,9 @@ def desktop_run(pw, ai, name, value):
 
 
 def phone_run(pw, ai, name, value):
-    """the same run on a phone: scroll down to the pipeline, swipe the canvas over to Fine-tune, tap it, scroll down to
-    its panel and tap Start a run, scroll back up to watch it run, then tap the Promotion gate and read its panel"""
+    """the same run on a phone, from the pipeline (under Tools, which the page opens on): swipe the canvas over a little,
+    tap Fine-tune (on a phone a tool opens over the page), swipe down its rows to Start a run and tap it, close it to
+    watch the run on the canvas, then tap the Promotion gate and swipe down its tool to the checkpoints"""
     browser = pw.chromium.launch(args=[f"--force-device-scale-factor={SCALE}"])
     ctx = browser.new_context(viewport={"width": a.width, "height": a.height}, device_scale_factor=SCALE, is_mobile=True,
                               has_touch=True, color_scheme="dark" if a.dark else "light", reduced_motion="no-preference")
@@ -238,14 +241,6 @@ def phone_run(pw, ai, name, value):
         page.evaluate("([a, b, c, d, ms, s, dx, dy]) => window.__finger.swipe(a, b, c, d, ms, s, dx, dy)",
                       [x0, y0, x1, y1, ms, scroller, dx, dy])
 
-    def scroll_page_to(y, ms=1000):
-        """a swipe up (or down) that brings page position y to the top"""
-        dy = y - page.evaluate("scrollY")
-        x = a.width * 0.56
-        y0, y1 = (a.height * 0.78, a.height * 0.78 - min(abs(dy), a.height * 0.6)) if dy > 0 else \
-            (a.height * 0.22, a.height * 0.22 + min(abs(dy), a.height * 0.6))
-        swipe(x, y0, x - 6, y1, ms, None, 0, dy)
-
     def tap(locator, dx=0.5, dy=0.5):
         b = locator.bounding_box()
         x, y = b["x"] + b["width"] * dx, b["y"] + b["height"] * dy
@@ -255,25 +250,45 @@ def phone_run(pw, ai, name, value):
         page.wait_for_timeout(110)
         page.evaluate("window.__finger.up()")
 
+    def reveal(locator, at, ms=800):
+        """a swipe up inside the tool's panel, which scrolls by itself on a phone, until locator's top is at `at` (a
+        share of the screen's height)"""
+        dy = locator.bounding_box()["y"] - a.height * at
+        if dy <= 0:
+            return
+        page.evaluate("""() => {
+          document.querySelectorAll('[data-rec-scroll]').forEach((e) => e.removeAttribute('data-rec-scroll'));
+          const p = document.querySelector('.ppanel');
+          const s = [p, ...p.querySelectorAll('*')].find((e) => /(auto|scroll)/.test(getComputedStyle(e).overflowY)
+            && e.scrollHeight > e.clientHeight + 4);
+          (s || document.scrollingElement).setAttribute('data-rec-scroll', '');
+        }""")
+        x = a.width * 0.56
+        swipe(x, a.height * 0.78, x - 6, a.height * 0.78 - min(dy, a.height * 0.6), ms, "[data-rec-scroll]", 0, dy)
+
+    # it starts on the pipeline (the first frame is the poster): Tools, above it, is a list of names
+    page.evaluate("(y) => scrollTo(0, y)", top(".pview") - 10)
+    page.wait_for_timeout(500)
     got, stop_cast = capture(ctx, page)
-    page.wait_for_timeout(1500)                                   # the model, its tabs and its tools
-    scroll_page_to(top(".pview") - 10)                            # down to the pipeline
-    page.wait_for_timeout(1100)
-    swipe(a.width * 0.78, a.height * 0.42, a.width * 0.18, a.height * 0.44, 900, ".pscroll", 232, 0)   # over to Fine-tune
+    page.wait_for_timeout(1600)                                   # the pipeline
+    # a little to the right, so Fine-tune and the Promotion gate are both in view (the canvas opens fitted, at 60%)
+    swipe(a.width * 0.62, a.height * 0.42, a.width * 0.36, a.height * 0.44, 800, ".pscroll", 100, 0)
     page.wait_for_timeout(700)
-    tap(node("train"), 0.4, 0.12)                                 # the next run
-    page.wait_for_timeout(600)
-    scroll_page_to(top(".pinspect") - 10)                         # its panel: the rows
-    page.wait_for_timeout(1300)
-    tap(page.locator(".pinspect").get_by_role("button", name="Start a run"))
+    tap(node("train"), 0.4, 0.12)                                 # the next run: its tool opens over the page
+    page.wait_for_timeout(1500)                                   # what's waiting to be learned
+    run = page.locator(".ppanel").get_by_role("button", name="Start a run")
+    reveal(run, 0.62)                                             # down to Start a run
+    page.wait_for_timeout(700)
+    tap(run)
     page.locator(".prun.is-running").first.wait_for(timeout=10000)
-    page.wait_for_timeout(300)
-    scroll_page_to(top(".pview") - 10, ms=900)                    # back up to watch it run
+    page.wait_for_timeout(900)
+    tap(page.locator(".ppanel-close"))                            # back to the canvas, to watch it run
     page.locator(".pnode[data-node=train] .prun:not(.is-running)").wait_for(timeout=60000)
     page.wait_for_timeout(1000)
     tap(node("promote"), 0.4, 0.15)                               # the gate
-    page.wait_for_timeout(500)
-    scroll_page_to(top(".pinspect") - 10)                         # its checkpoints, and the live one's pass rate
+    page.locator(".ppanel.is-open #versions-h").wait_for(timeout=10000)
+    page.wait_for_timeout(900)
+    reveal(page.locator(".ppanel #versions-h"), 0.3)              # its checkpoints (under the tool's own head)
     page.wait_for_timeout(2600)
     stop_cast()
     page.wait_for_timeout(200)
@@ -320,6 +335,10 @@ try:
     _, out = call("POST", "/api/studio/ais", {"name": "Fernbrook Support", "purpose": "Answers questions about orders, returns and warranty.",
                                               "kit": "customer-support", "voice": {"preset": "friendly"}, "color": "#1e40ff"}, cookie)
     ai = out["ai"]["id"]
+    # a new model starts with an empty canvas (Oct 28): the recording shows the whole pipeline, so every tool goes on it
+    for n in ("interview", "ground", "policies", "demonstrate", "correct", "evaluate", "base", "train", "promote", "serve",
+              "playground"):
+        call("POST", f"/api/studio/ais/{ai}/nodes/{n}", {"on": True}, cookie)
     call("POST", f"/api/studio/ais/{ai}/exam/run", {}, cookie)   # a first eval run: the pass rate the run starts from
     for _ in range(200):
         _, ex = call("GET", f"/api/studio/ais/{ai}/exam", cookie=cookie)
