@@ -14,6 +14,7 @@
 @property --edge { syntax: '<color>'; inherits: true; initial-value: transparent; }
 @property --field { syntax: '<color>'; inherits: true; initial-value: #8a8a8a; }
 @property --foot-edge { syntax: '<color>'; inherits: true; initial-value: #000000; }
+@property --canvas-dot { syntax: '<color>'; inherits: true; initial-value: #cfcfcf; }
 
 :root {
   --page: #ffffff;
@@ -26,6 +27,7 @@
   --edge: transparent; /* a panel's outline: only with Increase Contrast */
   --field: #8a8a8a;   /* input borders: 3.4:1 */
   --foot-edge: #000000; /* the footer's top edge: in light it's the footer itself */
+  --canvas-dot: #cfcfcf; /* the Studio canvas's dots (its #cfcfd4, without the blue), in the page's margins */
   --sans: "Cantarell", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --serif: "Cantarell", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --gutter: clamp(20px, 4vw, 48px);
@@ -36,13 +38,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --page: #000000; --panel: #161616; --ink: #f5f5f5; --ink-2: #a3a3a3; --line: #262626; --rule: #303030;
-    --ring: #2c2c2c; --field: #6e6e6e; --foot-edge: #262626;
+    --ring: #2c2c2c; --field: #6e6e6e; --foot-edge: #262626; --canvas-dot: #2c2c2c;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --page: #000000; --panel: #161616; --ink: #f5f5f5; --ink-2: #a3a3a3; --line: #262626; --rule: #303030;
-  --ring: #2c2c2c; --field: #6e6e6e; --foot-edge: #262626;
+  --ring: #2c2c2c; --field: #6e6e6e; --foot-edge: #262626; --canvas-dot: #2c2c2c;
   color-scheme: dark;
 }
 /* Increase Contrast: stronger secondary text and rules, and panels get an outline.
@@ -57,7 +59,7 @@
 /* site.js adds this class for a moment when the appearance changes, so only a change cross-fades */
 :root.ov-theming {
   transition: --page .25s ease, --panel .25s ease, --ink .25s ease, --ink-2 .25s ease, --line .25s ease, --rule .25s ease,
-    --ring .25s ease, --edge .25s ease, --field .25s ease, --foot-edge .25s ease;
+    --ring .25s ease, --edge .25s ease, --field .25s ease, --foot-edge .25s ease, --canvas-dot .25s ease;
 }
 /* error red, for invalid fields: 6.5:1 on the page (light), 9.4:1 (dark) */
 :root { --bad: #b42318; }
@@ -85,6 +87,22 @@ button, input { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 ::selection { background: var(--ink); color: var(--page); }
 .ov-wrap { width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 var(--gutter); }
+
+/* the margins: the Studio's canvas, its dot grid (20px apart, as at 100%), on the left and the right of the column,
+   from under the header down to the footer. It fades out before the column (.ov-wrap's words and panels start at
+   --margin), so nothing is ever read over it, and it only shows where a screen leaves room beside the column. */
+main { position: relative; isolation: isolate; }
+@media (min-width: 1360px) {
+  main::before {
+    --margin: max(var(--gutter), 50% - 592px);
+    content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background: radial-gradient(circle, var(--canvas-dot) 1px, transparent 1.4px) center top / 20px 20px;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(var(--margin) - 48px), transparent calc(var(--margin) - 20px),
+      transparent calc(100% - var(--margin) + 20px), #000 calc(100% - var(--margin) + 48px));
+    mask-image: linear-gradient(to right, #000 calc(var(--margin) - 48px), transparent calc(var(--margin) - 20px),
+      transparent calc(100% - var(--margin) + 20px), #000 calc(100% - var(--margin) + 48px));
+  }
+}
 
 /* ---- type */
 /* --serif and --sans are both Cantarell; the names are kept so headings and body can diverge later */
