@@ -1,4 +1,5 @@
-/* The Privacy Policy (/privacy/) and the Terms of Service (/terms/): one column of reading text.
+/* The Privacy Policy (/privacy/) and the Terms of Service (/terms/): one column of reading text (and on the Privacy
+   Policy, the pipeline's wires beside its title).
    Builds on site.css: the tokens (light and dark), the header and the footer. The words are the same as the Heura
    Studio app's /privacy and /terms pages. */
 
@@ -19,6 +20,22 @@
 .lg-main li::marker { color: var(--ink-2); }
 .lg-main strong { font-weight: 700; }
 .lg-main a { text-decoration: underline; text-underline-offset: 3px; }
+
+/* The Privacy Policy's title as a node on a pipeline (decoration): wires run in from the canvas to three ports 24px
+   left of the column and out from one 24px right of it, on past the screen's edges, level with the title's middle.
+   Never over the words; only on screens 1100px and wider, where there's room beside the column. */
+.lg-title { position: relative; }
+.lg-wires { display: none; }
+@media (min-width: 1100px) {
+  .lg-main { overflow-x: hidden; overflow-x: clip; }   /* (the wires run on past the screen's edges) */
+  .lg-wires {
+    display: block; position: absolute; top: 50%; width: 1600px; height: 160px; margin-top: -80px;
+    color: var(--ink); pointer-events: none;
+  }
+  .lg-wires-in { right: calc(100% + 16px); }
+  .lg-wires-out { left: calc(100% + 16px); }
+  .lg-wires circle { fill: currentColor; stroke: var(--page); stroke-width: 2; }
+}
 
 .legal-table { width: 100%; margin: 8px 0 20px; border-collapse: collapse; font-size: 15px; }
 .legal-table th {

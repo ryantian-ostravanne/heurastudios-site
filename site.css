@@ -70,8 +70,9 @@
 *, *::before, *::after { box-sizing: border-box; }
 html { background: var(--page); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+/* (isolated, so the margins' canvas, body::before at z-index -1, paints over body's own background and under the rest) */
 body {
-  display: flex; flex-direction: column; min-height: 100vh; margin: 0;
+  display: flex; flex-direction: column; min-height: 100vh; margin: 0; isolation: isolate;
   background: var(--page); color: var(--ink);
   font-family: var(--sans); font-size: 16px; line-height: 1.55; font-weight: 400; letter-spacing: -.003em;
   -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
@@ -88,14 +89,14 @@ button, input { font: inherit; color: inherit; }
 ::selection { background: var(--ink); color: var(--page); }
 .ov-wrap { width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 var(--gutter); }
 
-/* the margins: the Studio's canvas, its dot grid (20px apart, as at 100%), on the left and the right of the column,
-   from under the header down to the footer. It fades out before the column (.ov-wrap's words and panels start at
+/* the margins: the Studio's canvas, its dot grid (20px apart, as at 100%), on the left and the right of the column.
+   It stays still while the page scrolls over it: fixed to the screen, under everything, so the header and the footer
+   (each with a background of its own) cover it. It fades out before the column (.ov-wrap's words and panels start at
    --margin), so nothing is ever read over it, and it only shows where a screen leaves room beside the column. */
-main { position: relative; isolation: isolate; }
 @media (min-width: 1360px) {
-  main::before {
+  body::before {
     --margin: max(var(--gutter), 50% - 592px);
-    content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
     background: radial-gradient(circle, var(--canvas-dot) 1px, transparent 1.4px) center top / 20px 20px;
     -webkit-mask-image: linear-gradient(to right, #000 calc(var(--margin) - 48px), transparent calc(var(--margin) - 20px),
       transparent calc(100% - var(--margin) + 20px), #000 calc(100% - var(--margin) + 48px));

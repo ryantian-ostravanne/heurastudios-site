@@ -96,8 +96,10 @@ error and the site keeps its last good version. Fix the file and commit again.
   dark, as `.mp4` (H.264, for iPhones) and `.webm`, each with a `.webp` poster. To re-record:
   `python3 _tools/record-pipeline.py <app checkout> img` with `--dark`, `--phone` and `--phone --dark`. Needs
   ffmpeg and Playwright for Python. Last recorded Oct 29, 2026, from the app at f6764a9.
-- **Side margins:** the Studio canvas's dot grid, left and right of the content column, never behind it
-  (`main::before` in `site.css`; `_tests/margins.test.js` checks it on every page, light and dark).
+- **Side margins:** the Studio canvas's dot grid, left and right of the content column, never behind it, and still
+  while the page scrolls (`body::before` in `site.css`, fixed). On the Privacy Policy, pipeline wires run in to
+  its title and out of it (the inline SVGs in `privacy/index.html`, styled in `legal.css`).
+  `_tests/margins.test.js` checks both.
 - **Logo and icons** (`favicon.*`, `icon-512.png`, `apple-touch-icon.png`, `og-image.png`): all drawn from one
   drawing in `_tools/make-logo.py`. Run `python3 _tools/make-logo.py` (add `--card` to also update the link-preview
   card). If the drawing changes, update the inline SVG in `_includes/logo.html` to match. The tests check that.
