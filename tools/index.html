@@ -1,0 +1,51 @@
+---
+layout: default
+title: "Tools"
+description: "Every tool in Heura Studios, from Grounding to the Playground: what each one takes, what it gives, and a short recording of it in use."
+og_title: "Heura Studios Tools"
+current: tools
+css: [/tools.css]
+js: [/recording.js, /tools.js]
+---
+{%- comment -%}
+  The Tools page (Ryan, Oct 29: "make tools a separate page", "every single feature have a video demo", "dont put how
+  to use. like just have the tool thingy and like have the video below"). The rows come from _data/tools.yml (the
+  Studio's palette, in its groups and order); each tool's recording is img/tools/<clip>.* (and -dark.*), made with
+  _tools/record-tools.py from the real Studio. tools.js plays each while it's on screen (recording.js).
+{%- endcomment %}
+<main id="main" class="tl-main">
+  <div class="ov-wrap">
+    <div class="tl-intro">
+      <h1 class="ov-display">Tools</h1>
+      <p class="ov-lead">Operators bring the signal. The owner keeps the eval set, the base model and the gate.</p>
+      <p class="hm-key"><span class="hm-key-tile" aria-hidden="true"></span>Owner only</p>
+    </div>
+{%- for group in site.data.tools %}
+    <section class="tl-group cat-{{ group.id }}" aria-labelledby="tl-{{ group.id }}">
+      <h2 class="tl-group-name" id="tl-{{ group.id }}"><span class="hm-dot" aria-hidden="true"></span>{{ group.name }}</h2>
+      <ul class="tl-list" aria-labelledby="tl-{{ group.id }}">
+{%- for tool in group.tools %}
+        <li class="tl-tool{% if tool.owner %} is-owner{% endif %}" id="{{ tool.clip }}">
+          <h3 class="tl-name"><span class="hm-tile" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="square" stroke-linejoin="miter">{{ tool.icon }}</svg></span>{{ tool.name }}{% if tool.owner %} <span class="hm-owner">Owner only</span>{% endif %}</h3>
+          <dl class="tl-io">
+            <div><dt>Takes</dt><dd>{{ tool.takes }}</dd></div>
+            <div><dt>Gives</dt><dd>{{ tool.gives }}</dd></div>
+          </dl>
+          <figure class="tl-film">
+            <div class="tl-frame" style="--poster: url(/img/tools/{{ tool.clip }}.webp); --poster-dark: url(/img/tools/{{ tool.clip }}-dark.webp)">
+              <video class="tl-video" width="640" height="480" muted loop playsinline controls preload="none"
+                data-light="/img/tools/{{ tool.clip }}" data-dark="/img/tools/{{ tool.clip }}-dark"
+                aria-label="{{ tool.name }} in Heura Studios: {{ tool.shows }}">
+                <source src="/img/tools/{{ tool.clip }}.mp4" type="video/mp4">
+                <source src="/img/tools/{{ tool.clip }}.webm" type="video/webm">
+              </video>
+            </div>
+            <button class="tl-toggle" type="button" data-name="{{ tool.name }}" hidden>Pause</button>
+          </figure>
+        </li>
+{%- endfor %}
+      </ul>
+    </section>
+{%- endfor %}
+  </div>
+</main>
