@@ -2,7 +2,9 @@
 // border/right and left sides"): the Studio canvas's dot grid fills the page's margins, left and right of the column,
 // on every page and in both appearances, from under the header down to the footer. It fades out before the column, so
 // no word or panel ever sits on it, and it only shows where a screen leaves room beside the column: not on a phone,
-// not on a 1280px laptop.
+// not on a 1280px laptop. Then ("make the canvas thing still and only have the center part scroll") it stays still
+// while the page scrolls, and ("for the privacy policy ... add like the pipeline lines as deco") the Privacy Policy's
+// title is a node on a pipeline: wires run in to it from the left and out of it to the right.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { startServer, launch, readPng } = require('./helpers');
@@ -107,5 +109,84 @@ test('the header covers the dots as the page scrolls under it, and the footer ha
     const shot = await band(page, { x: 0, y: Math.ceil(foot.y) + 2, width, height: 80 });
     assert.equal(farthest(shot, 0, 140, 0), 0, `${scheme}: the footer (always black)`);
     await close();
+  }
+});
+
+test('the dots stay still while the page scrolls: only the column moves', async () => {
+  const width = 1600, margin = (width - COLUMN) / 2;
+  const { page, close } = await bare('/', width);
+  const clip = { x: 0, y: 120, width: margin - 60, height: 300 };
+  const before = await band(page, clip);
+  await page.evaluate(() => scrollTo(0, 310));   // (not a multiple of 20: dots that scrolled along would be 10px off)
+  await page.waitForTimeout(100);
+  assert.equal(await page.evaluate(() => scrollY), 310, 'the page scrolled');
+  const after = await band(page, clip);
+  let moved = 0;
+  for (let y = 0; y < before.height; y++) {
+    for (let x = 0; x < before.width; x++) if (before.rgb(x, y).join() !== after.rgb(x, y).join()) moved++;
+  }
+  assert.equal(moved, 0, 'the margin looks the same after scrolling 310px');
+  await close();
+});
+
+// The Privacy Policy's title as a node: its words hidden, a band level with its middle shows the wires
+async function privacyBand(width, scheme) {
+  const ctx = await browser.newContext({ viewport: { width, height: 1000 }, colorScheme: scheme, reducedMotion: 'reduce' });
+  const page = await ctx.newPage();
+  await page.goto(server.url + '/privacy/');
+  await page.addStyleTag({ content: '.lg-title h1, .lg-main section { visibility: hidden !important; }' });
+  const title = await page.locator('.lg-title').boundingBox();
+  const middle = Math.round(title.y + title.height / 2);
+  const shot = await band(page, { x: 0, y: middle - 80, width, height: 160 });
+  return { page, title, shot, close: () => ctx.close() };
+}
+
+// pixels in columns x0 to x1 (both in) far from the page's color: a wire's, not the dots' (at most 48 away)
+function wire(shot, x0, x1, page) {
+  let n = 0;
+  for (let y = 0; y < shot.height; y++) {
+    for (let x = x0; x <= x1; x++) if (shot.rgb(x, y).some(v => Math.abs(v - page) > 100)) n++;
+  }
+  return n;
+}
+
+test('the Privacy Policy: wires run in from the left edge to its title and out of it to the right edge, never over the words', async () => {
+  for (const scheme of ['light', 'dark']) {
+    for (const width of [1600, 1180]) {
+      const { title, shot, close } = await privacyBand(width, scheme);
+      const at = `${width}px (${scheme})`;
+      const left = Math.floor(title.x) - 9, right = Math.ceil(title.x + title.width) + 8;
+      assert.ok(wire(shot, 0, left, PAGE[scheme]) > 0, `${at}: wires on the left`);
+      assert.ok(wire(shot, right, width - 1, PAGE[scheme]) > 0, `${at}: wires on the right`);
+      assert.ok(wire(shot, 0, 2, PAGE[scheme]) > 0, `${at}: in from the screen's left edge`);
+      assert.ok(wire(shot, width - 3, width - 1, PAGE[scheme]) > 0, `${at}: out past its right edge`);
+      assert.equal(farthest(shot, left + 9, right - 8, PAGE[scheme]), 0, `${at}: nothing over the column`);
+      await close();
+    }
+  }
+});
+
+test('no wires where there is no room (under 1100px), or on the other pages; nothing scrolls sideways', async () => {
+  for (const width of [390, 1024]) {
+    const ctx = await browser.newContext({ viewport: { width, height: 900 } });
+    const page = await ctx.newPage();
+    await page.goto(server.url + '/privacy/');
+    assert.equal(await page.locator('.lg-wires').first().isVisible(), false, `${width}px`);
+    await ctx.close();
+  }
+  for (const width of [1100, 1600, 2560]) {
+    const ctx = await browser.newContext({ viewport: { width, height: 900 } });
+    const page = await ctx.newPage();
+    await page.goto(server.url + '/privacy/');
+    assert.equal(await page.locator('.lg-wires').first().isVisible(), true, `${width}px`);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth), 0, `${width}px`);
+    await ctx.close();
+  }
+  for (const path of ['/', '/terms/', '/waitlist/']) {
+    const ctx = await browser.newContext({ viewport: { width: 1600, height: 900 } });
+    const page = await ctx.newPage();
+    await page.goto(server.url + path);
+    assert.equal(await page.locator('.lg-wires').count(), 0, path);
+    await ctx.close();
   }
 });
