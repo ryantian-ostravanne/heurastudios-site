@@ -1,6 +1,6 @@
 {%- comment -%}
-  The sticky header. On the home page the section links stay on the page (#tools); elsewhere they go to /#tools.
-  Front matter: current (blog | privacy | terms) marks the current link; hide_request_button drops the button.
+  The sticky header. Tools and Blog are pages of their own; Request access is a section of the home page (#request).
+  Front matter: current (tools | blog | privacy | terms) marks the current link; hide_request_button drops the button.
 {%- endcomment -%}
 {%- if page.url == '/' -%}{%- assign home = '' -%}{%- else -%}{%- assign home = '/' -%}{%- endif -%}
 {%- if page.url == '/' %}
@@ -10,7 +10,7 @@
   <div class="ov-wrap ov-top-row">
     {% include logo.html %}
     <nav class="ov-nav" aria-label="Sections">
-      <a href="{{ home }}#tools">Tools</a>
+      <a href="/tools/"{% if page.current == 'tools' %} aria-current="page"{% endif %}>Tools</a>
       <a href="/blog/"{% if page.current == 'blog' %} aria-current="page"{% endif %}>Blog</a>
     </nav>
 {%- unless page.hide_request_button %}
