@@ -1,4 +1,4 @@
-/* The home page (/): hero, screen recording, tools, specifications and the Request access form. */
+/* The home page (/): hero, screen recording, specifications and the Request access form (Tools: tools.css). */
 
 /* the hero: the headline on the left, the lead and the buttons beside it */
 .hm-hero { padding-top: clamp(48px, 8vw, 120px); }
@@ -46,77 +46,6 @@
 @media (max-width: 599px) {
   .hm-film { grid-template-columns: minmax(0, 1fr); }
   .hm-toggle { grid-row: 3; grid-column: 1; justify-self: start; margin-top: 12px; }
-}
-
-/* the tools: the Studio's own tools (its schematic icons on plain hairline tiles, the owner's on dark tiles; a group's
-   very light color is only its dot), each with what it takes and what it gives. In columns while the panel is wide; on
-   a phone each row says Takes and Gives itself (the labels are always there for screen readers). */
-:root {
-  --owner: #1d1d1f; --owner-ink: #f5f5f7;
-  --dot-signal: #9cc2ea; --dot-train: #c4b4e5; --dot-release: #d6b98a;
-}
-:root[data-theme="dark"] {
-  --owner: #f5f5f7; --owner-ink: #1d1d1f;
-  --dot-signal: #5f86b3; --dot-train: #8574b0; --dot-release: #a8895a;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --owner: #f5f5f7; --owner-ink: #1d1d1f;
-    --dot-signal: #5f86b3; --dot-train: #8574b0; --dot-release: #a8895a;
-  }
-}
-/* beside the panel on a wide screen, the heading and the key stay in view while the eleven rows go by */
-@media (min-width: 900px) {
-  #tools .ov-head { position: sticky; top: calc(var(--header) + 32px); }
-}
-.hm-tools {
-  container: tools / inline-size; padding: clamp(20px, 2.6vw, 32px) clamp(18px, 2.6vw, 32px) clamp(12px, 1.6vw, 20px);
-  border: 1px solid var(--edge); border-radius: clamp(16px, 1.8vw, 24px); background: var(--panel);
-}
-.hm-tools-cols, .hm-tool {
-  display: grid; grid-template-columns: 28px minmax(0, 9.5em) minmax(0, 1fr) minmax(0, 1fr); column-gap: 16px;
-}
-.hm-tools-cols { margin-bottom: 4px; font-size: 13px; line-height: 1.4; color: var(--ink-2); }
-.hm-tools-cols span:first-child { grid-column: 3; }
-.hm-tool-group + .hm-tool-group { margin-top: 28px; }
-.hm-group-name {
-  display: flex; align-items: center; gap: 8px; padding: 8px 0 6px;
-  font-size: 14px; font-weight: 700; line-height: 1.4; color: var(--ink-2);
-}
-.hm-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; }
-.cat-signal .hm-dot { background: var(--dot-signal); }
-.cat-train .hm-dot { background: var(--dot-train); }
-.cat-release .hm-dot { background: var(--dot-release); }
-.hm-tool { align-items: start; padding: 12px 0; border-top: 1px solid var(--rule); }
-.hm-tile {
-  display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px;
-  border: 1px solid var(--rule); background: var(--page); color: var(--ink);
-}
-.hm-tile svg { display: block; }
-.hm-tool.is-owner .hm-tile { border-color: var(--owner); background: var(--owner); color: var(--owner-ink); }
-.hm-tool.is-soon .hm-tile { color: var(--ink-2); }
-.hm-tool-id { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: 28px; }
-.hm-tool-name { font-size: 16px; font-weight: 700; line-height: 1.4; letter-spacing: -.005em; }
-.hm-soon { padding: 1px 7px; border-radius: 6px; background: var(--page); font-size: 12px; line-height: 18px; color: var(--ink-2); white-space: nowrap; }
-/* the owner's tools: the dark tile says it, and the key beside the heading names it once ("Owner only" is read out on
-   each, for screen readers) */
-.hm-key { display: flex; align-items: center; gap: 8px; margin-top: 20px; font-size: 13px; line-height: 1.4; color: var(--ink-2); }
-.hm-key-tile { flex: none; width: 14px; height: 14px; border-radius: 4px; background: var(--owner); }
-.is-soon .hm-tool-name { color: var(--ink-2); }
-.hm-io { padding-top: 3px; font-size: 15px; line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
-.hm-io-label, .hm-owner {   /* read by screen readers (the labels show on a phone, where there are no column names) */
-  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%);
-  white-space: nowrap; border: 0;
-}
-@container tools (max-width: 559px) {
-  .hm-tools-cols { display: none; }
-  .hm-tool { grid-template-columns: 28px minmax(0, 1fr); row-gap: 6px; }
-  /* the label in its own column, so a wrapped line starts under the words, not under the label */
-  .hm-io { grid-column: 2; display: grid; grid-template-columns: 3.6em minmax(0, 1fr); column-gap: 6px; padding-top: 0; }
-  .hm-io-label {
-    position: static; width: auto; height: auto; margin: 0; overflow: visible; clip-path: none;
-    padding-top: 2px; font-size: 13px; font-weight: 700; color: var(--ink-2);
-  }
 }
 
 /* the specifications: one row per part, its name and exactly what it is */
