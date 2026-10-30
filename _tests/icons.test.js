@@ -10,7 +10,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { startServer, launch, ROOT } = require('./helpers');
 
-const PAGES = ['/', '/waitlist/', '/privacy/', '/terms/'];
+const PAGES = ['/', '/tools/', '/waitlist/', '/privacy/', '/terms/'];
 const CARD = 'https://heurastudios.com/og-image.png';
 
 function pngSize(file) {

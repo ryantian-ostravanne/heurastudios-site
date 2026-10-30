@@ -9,7 +9,7 @@ const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const { startServer, launch, buildSite, ROOT } = require('./helpers');
 
-const PAGES = ['/', '/waitlist/', '/privacy/', '/terms/'];
+const PAGES = ['/', '/tools/', '/waitlist/', '/privacy/', '/terms/'];
 const BLOG = ['/blog/', '/blog/heura-eval-004/'];
 // the drawing's own inline SVG, as the tool prints it
 const MARK = execFileSync('python3', ['-c', [

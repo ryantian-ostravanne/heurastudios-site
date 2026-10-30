@@ -106,7 +106,7 @@ async function checkWords(url, p) {
 }
 
 test('every word on every page is set in Cantarell, at 400 or 700', async () => {
-  for (const p of ['/', '/waitlist/', '/privacy/', '/terms/']) await checkWords(server.url, p);
+  for (const p of ['/', '/tools/', '/waitlist/', '/privacy/', '/terms/']) await checkWords(server.url, p);
 });
 
 test('and on the blog as Jekyll builds it, a post’s italics included', async () => {

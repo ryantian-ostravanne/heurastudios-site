@@ -43,7 +43,7 @@ async function fill(page, email, company) {
 // who follows an old link.
 const APP = 'https://app.heurastudios.com';
 test('every call to action is Request access, and no header or footer has Log in', async () => {
-  for (const path of ['/', '/privacy/', '/terms/']) {
+  for (const path of ['/', '/tools/', '/privacy/', '/terms/']) {
     const { page, errors, close } = await open(path);
     const asks = page.getByRole('link', { name: 'Request access' });
     assert.ok(await asks.count() >= 2, `${path}: the header and the footer`);
@@ -66,7 +66,7 @@ test('every call to action is Request access, and no header or footer has Log in
 // Every page shares one card (og-image.png: the headline beside a frame of the recording), so every page describes
 // that card, not the one before it (Oct 24, 2026).
 test('every page describes the share card it shows: the headline and a model’s pipeline', async () => {
-  for (const path of ['/', '/privacy/', '/terms/', '/waitlist/']) {
+  for (const path of ['/', '/tools/', '/privacy/', '/terms/', '/waitlist/']) {
     const { page, errors, close } = await open(path);
     assert.equal(await page.locator('meta[property="og:image"]').getAttribute('content'), 'https://heurastudios.com/og-image.png', path);
     assert.equal(await page.locator('meta[property="og:image:alt"]').getAttribute('content'),
