@@ -91,10 +91,12 @@ button, input { font: inherit; color: inherit; }
 ::selection { background: var(--ink); color: var(--page); }
 .ov-wrap { width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 var(--gutter); }
 
-/* the margins: the Studio's canvas (its grey, and its dot grid 20px apart, as at 100%) on the left and the right, and
-   the column a sheet on it: the page's color with an edge, from under the header down to the footer, so the middle
+/* the margins: the Studio's canvas (its grey, and its dot grid 20px apart, as at 100%) on the left and the right, from
+   the top of the screen down to the footer, and the column a sheet on it: the page's color with an edge, so the middle
    stands out. The canvas stays still while the page scrolls over it: fixed to the screen, under everything (the
-   header and the footer have backgrounds of their own). Only where a screen leaves room beside the column. */
+   footer has a canvas of its own). The header covers only the column: it's the sheet's top, with the same edges and,
+   once the page scrolls, its rule (Ryan, Oct 29: "remove these two sides"). Only where a screen leaves room beside
+   the column. */
 @media (min-width: 1360px) {
   body::before {
     content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
@@ -156,6 +158,15 @@ button, input { font: inherit; color: inherit; }
   border-bottom: 1px solid transparent; transition: border-color .2s ease;
 }
 .ov-top.is-scrolled { border-bottom-color: var(--line); }
+@media (min-width: 1360px) {   /* beside the column, the canvas (see the margins, above): the header is the sheet's top */
+  .ov-top, .ov-top.is-scrolled { background: none; border-bottom-color: transparent; }
+  .ov-top::before {   /* its rule where the header's own would be */
+    content: ""; position: absolute; top: 0; bottom: -1px; left: calc(50% - 640px); width: 1280px; z-index: -1;
+    background: var(--page); box-shadow: -1px 0 var(--line), 1px 0 var(--line); pointer-events: none;
+    border-bottom: 1px solid transparent; transition: border-color .2s ease;
+  }
+  .ov-top.is-scrolled::before { border-bottom-color: var(--line); }
+}
 .ov-top-row { display: flex; align-items: center; gap: 24px; min-height: var(--header); }
 .ov-logo {
   display: inline-flex; align-items: center; gap: 10px; min-height: 44px; white-space: nowrap;

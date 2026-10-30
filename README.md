@@ -1,7 +1,8 @@
 # heurastudios.com
 
-The Heura Studios marketing site: home page, blog, legal pages and the old `/waitlist/` page. It's a static site
-that GitHub Pages builds with Jekyll 3.10, plus a small Google Apps Script that saves form sign-ups to a Google Sheet.
+The Heura Studios marketing site: home page, Tools page, blog, legal pages and the old `/waitlist/` page. It's a
+static site that GitHub Pages builds with Jekyll 3.10, plus a small Google Apps Script that saves form sign-ups to a
+Google Sheet.
 
 ## Quick start
 
@@ -23,8 +24,10 @@ Pushing to `main` deploys (GitHub Pages, about a minute). CI runs `npm test` on 
 | `_includes/head.html` | Everything in `<head>`: meta and link-preview tags, the theme script, fonts, CSS and JS |
 | `_includes/header.html`, `footer.html`, `logo.html` | The shared header, footer and logo |
 | `_layouts/blog.html`, `post.html` | Blog wrapper and a single post |
-| `index.html` + `home.css` + `home.js` | Home page: hero, screen recording, tools, specs, Request access form |
-| `_data/tools.yml` | The tool rows on the home page (edit copy here, not in the HTML) |
+| `index.html` + `home.css` + `home.js` | Home page: hero, screen recording, specs, Request access form |
+| `tools/index.html` + `tools.css` + `tools.js` | Tools page: every Studio tool, what it takes and gives, and its recording |
+| `_data/tools.yml` | The tools on the Tools page, in the Studio's groups and order (edit copy here, not in the HTML) |
+| `recording.js` | Plays a screen recording while it's on screen, in the files for the current appearance (home and Tools) |
 | `privacy/`, `terms/` + `legal.css` | Privacy Policy and Terms of Service |
 | `waitlist/` | The old waitlist page (kept for old links) |
 | `blog/index.html`, `_posts/`, `blog.css` | Blog list and posts (Markdown) |
@@ -45,7 +48,7 @@ Folders starting with `_` are never published.
 - **Header, footer or logo:** edit the file in `_includes/` once. Every page picks it up.
 - **A new page:** create `something/index.html` with front matter (`layout: default`, `title`, `description`, and
   `css:` / `js:` for any page-specific files), then write the page's `<main>…</main>`.
-- **A tool on the home page:** edit `_data/tools.yml`.
+- **A tool on the Tools page:** edit `_data/tools.yml`. A new tool also needs its recording (`clip:`, see below).
 - **The forms' endpoint:** `form_endpoint` in `_config.yml`.
 - **Colors:** tokens at the top of `site.css`. Every color has a light, dark and high-contrast value. The site is
   black and white only.
@@ -96,9 +99,16 @@ error and the site keeps its last good version. Fix the file and commit again.
   dark, as `.mp4` (H.264, for iPhones) and `.webm`, each with a `.webp` poster. To re-record:
   `python3 _tools/record-pipeline.py <app checkout> img` with `--dark`, `--phone` and `--phone --dark`. Needs
   ffmpeg and Playwright for Python. Last recorded Oct 29, 2026, from the app at f6764a9.
+- **Tool recordings** (`img/tools/<clip>*`): one short clip per tool on the Tools page, a close-up of its panel in the
+  real Studio at 640 x 480, light and dark (`<clip>-dark.*`), in the same three files. To re-record:
+  `python3 _tools/record-tools.py <app checkout> img/tools`, then again with `--dark`; `--only fine-tune,serving`
+  re-records some. It runs the Studio with stand-in engines (no GPU, no real OpenAI), with sample data for a
+  made-up store, Fernbrook. Each tool's steps are a function in the script, named for its `clip:`. Last recorded
+  Oct 29, 2026, from the app at f6764a9.
 - **Side margins and the sheet:** on screens 1360px and wider, the Studio's canvas (its grey and dot grid) fills the
   margins and stays still while the page scrolls (`body::before` in `site.css`, fixed), and the column is a sheet
-  on it, the page's color with an edge (`main::before`).
+  on it, the page's color with an edge (`main::before`). The header covers only the column, as the sheet's top
+  (`.ov-top::before`), so beside it the canvas runs up to the top of the screen.
 - **Pipeline wires** (`_includes/wires.html`): decoration that makes a box a node on a pipeline, wires running in
   from the screen's left edge and out past its right edge, beside each legal page's title (from 1100px, `legal.css`).
 - **The footer is a pipeline** (`_includes/footer.html`, styled in `site.css`): its sections are Studio nodes on

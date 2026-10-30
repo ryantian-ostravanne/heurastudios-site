@@ -66,11 +66,14 @@ test('the hero: the headline and the lead, and the header has the one Request ac
 test('the header and the footer go to sections that exist', async () => {
   const { page, close } = await open('/');
   const header = await page.locator('header a').evaluateAll(as => as.map(a => [a.textContent.trim(), a.getAttribute('href')]));
-  assert.deepEqual(header, [['Heura Studios', '/'], ['Tools', '#tools'], ['Blog', '/blog/'],
+  // (Oct 29: Tools is a page of its own, /tools/, each tool with its recording; the home page keeps Request access)
+  assert.deepEqual(header, [['Heura Studios', '/'], ['Tools', '/tools/'], ['Blog', '/blog/'],
     ['Request access', '#request']]);
   assert.deepEqual(await page.locator('footer nav').first().locator('a').allTextContents(),
     ['Tools', 'Request access', 'Blog']);
-  for (const id of ['tools', 'request']) assert.equal(await page.locator(`main #${id}`).count(), 1, id);
+  assert.equal(await page.locator('footer nav').first().getByRole('link', { name: 'Tools' }).getAttribute('href'), '/tools/');
+  assert.equal(await page.locator('main #request').count(), 1);
+  assert.equal(await page.locator('main #tools').count(), 0, 'the tools are on their own page now');
   assert.equal(await page.getByRole('link', { name: 'Get started' }).count(), 0, 'access is requested now, not signed up for');
   await close();
 });
@@ -256,89 +259,7 @@ test('without JavaScript the recording shows its first frame with the browser’
   await close();
 });
 
-// Ryan, Oct 24, 10:17: the numbered sequence "resembles every vibecoded site": "make it tools instead". The section is
-// the Studio's own tool palette: its eleven tools in its three groups, the owner's on dark tiles, and for each what it
-// takes and what it gives. Not a numbered list.
-// Ryan, 11:06: the icons "look childish" and the names "sound kinda cringe". He picked the schematic drawings (the ground
-// symbol, a +/- diff, >= for the gate) on hairline tiles with no pastel colors, and nouns for the names.
-const TOOLS = [
-  ['Signal', [['Grounding', 'documents', 'context, retrieved at answer time'],
-    ['Policies', 'rules, in plain words', 'a constraint on every answer'],
-    ['Demonstrations', 'input and output pairs', 'training rows, three per new pair'],
-    ['Corrections', 'an answer from the Playground, fixed or marked good', 'a demonstration'],
-    ['Interviews', 'an operator’s answers to the model’s questions', 'facts and rules it answers from']]],
-  ['Training', [['Eval set', 'prompts, each with what a passing answer must contain', 'a pass rate, before and after every run'],
-    ['Base model', 'Heura Arche (2B), or a model you bring', 'the model that answers'],
-    ['Fine-tune', 'new demonstrations and corrections, plus a replay mix', 'a LoRA checkpoint on Heura Arche'],
-    ['OpenAI fine-tune', 'the same rows', 'a fine-tuned OpenAI model']]],
-  ['Release', [['Promotion gate', 'a run’s checkpoint', 'the live checkpoint, unless it scores lower'],
-    ['Serving', 'the live checkpoint', 'an OpenAI-compatible endpoint, an embed, an export']]],
-];
-const OWNERS = ['Eval set', 'Base model', 'OpenAI fine-tune', 'Promotion gate'];
-
-test('Tools: the Studio’s eleven, in its three groups, each with what it takes and gives, and the owner’s marked', async () => {
-  const { page, errors, close } = await open('/');
-  const tools = page.locator('#tools');
-  assert.equal(await tools.locator('h2').innerText(), 'Tools');
-  assert.equal(await tools.locator('.ov-section-lead').innerText(),
-    'Operators bring the signal. The owner keeps the eval set, the base model and the gate.');
-  assert.equal(await tools.locator('ol').count(), 0, 'not a numbered list');
-  // the owner's tools are dark tiles, as in the Studio; the key beside the heading says so (and each one says it too,
-  // to a screen reader)
-  assert.equal(await tools.locator('.hm-key').innerText(), 'Owner only');
-  assert.equal(await tools.locator('.hm-tool .hm-owner').count(), OWNERS.length);
-  assert.equal(await tools.locator('.hm-tool .hm-owner').first().evaluate(e => getComputedStyle(e).position), 'absolute');
-  assert.deepEqual(await tools.locator('h3').allInnerTexts(), TOOLS.map(([group]) => group));
-  for (const [group, rows] of TOOLS) {
-    const list = tools.getByRole('list', { name: group, exact: true });
-    const items = list.getByRole('listitem');
-    assert.equal(await items.count(), rows.length, group);
-    for (const [i, [name, takes, gives]] of rows.entries()) {
-      const item = items.nth(i);
-      assert.equal(await item.locator('.hm-tool-name').innerText(), name);
-      // read in order, with its labels: "Ground Takes documents Gives context, retrieved at answer time"
-      const said = (await item.evaluate(li => li.textContent)).replace(/\s+/g, ' ').trim();
-      const owner = OWNERS.includes(name) ? ' Owner only' : '';
-      const soon = name === 'Interviews' ? ' Soon' : '';
-      assert.equal(said, `${name}${owner}${soon} Takes ${takes} Gives ${gives}`, name);
-      assert.equal(await item.locator('.hm-tile svg[viewBox="0 0 20 20"]').count(), 1, `${name}: its schematic icon`);
-      assert.equal(await item.evaluate(li => li.classList.contains('is-owner')), OWNERS.includes(name), `${name}: owner`);
-    }
-  }
-  // no pastel tiles: every operator tool's tile is the same plain tile with a hairline edge, whatever its group (the
-  // group's color is its dot); the owner's are dark
-  const tiles = await tools.locator('.hm-tile').evaluateAll(ts => ts.map(t => {
-    const cs = getComputedStyle(t);
-    return { owner: t.closest('.hm-tool').classList.contains('is-owner'), bg: cs.backgroundColor, edge: cs.borderTopWidth };
-  }));
-  assert.equal(new Set(tiles.filter(t => !t.owner).map(t => t.bg)).size, 1, 'one plain tile for every group');
-  assert.ok(tiles.filter(t => !t.owner).every(t => t.edge === '1px'), 'a hairline edge');
-  assert.ok(tiles.filter(t => t.owner).every(t => t.bg === 'rgb(29, 29, 31)'), 'the owner’s are dark');
-  assert.deepEqual(errors, []);
-  await close();
-});
-
-test('Tools: the columns line up on a wide screen, and on a phone each row says Takes and Gives', async () => {
-  for (const width of [1280, 390]) {
-    const { page, close } = await open('/', { viewport: { width, height: 900 } });
-    const rows = page.locator('#tools .hm-tool');
-    const layout = await rows.evaluateAll(lis => lis.map(li => {
-      const [takes, gives] = li.querySelectorAll('.hm-io');
-      return { takes: Math.round(takes.getBoundingClientRect().left), gives: Math.round(gives.getBoundingClientRect().left),
-        label: getComputedStyle(takes.querySelector('.hm-io-label')).position !== 'absolute' };
-    }));
-    if (width > 700) {
-      assert.equal(new Set(layout.map(r => r.takes)).size, 1, `${width}: every Takes starts at one edge`);
-      assert.equal(new Set(layout.map(r => r.gives)).size, 1, `${width}: every Gives starts at one edge`);
-      assert.ok(await page.locator('#tools .hm-tools-cols').isVisible(), 'the column names, once');
-      assert.ok(layout.every(r => !r.label), 'the per-row labels are for screen readers here');
-    } else {
-      assert.equal(await page.locator('#tools .hm-tools-cols').isVisible(), false);
-      assert.ok(layout.every(r => r.label), `${width}: each row shows its labels`);
-    }
-    await close();
-  }
-});
+// The Tools section (Ryan, Oct 24) is the Tools page now (Oct 29): _tests/tools.test.js.
 
 // Ryan, 11:06: "remove the title what it does and what it doesnt like make it sound better". A spec sheet in its place:
 // one row per part, saying exactly what each is (supervised fine-tuning, 2B, OpenAI-compatible), so nothing it can't do
@@ -361,7 +282,7 @@ test('Specifications: one row per part, in place of what it does and doesn’t',
   assert.match(await row('Access'), /^The owner keeps the base model, the eval set, promotion, keys and exports\.$/);
   const text = await page.evaluate(() => document.body.innerText);
   for (const gone of ['What it does', 'It doesn’t', 'doesn’t yet']) assert.ok(!text.includes(gone), gone);
-  assert.equal(text.split('Operators bring the signal.').length - 1, 1, 'said once, where the tools start');
+  assert.ok(!text.includes('Operators bring the signal.'), 'said where the tools are: the Tools page (tools.test.js)');
   // (Ryan, Oct 26: the line under Request access was "just yap": the heading, then Log in, then the form)
   assert.equal(await page.locator('#request .ov-section-lead').count(), 0);
   for (const gone of ['contract with Ostravanne', 'A founder checks every request']) assert.ok(!text.includes(gone), gone);
@@ -530,7 +451,7 @@ for (const width of [1280, 834, 375]) {
 for (const scheme of ['light', 'dark']) {
   test(`secondary text reads at 4.5:1 or more (${scheme})`, async () => {
     const { page, close } = await open('/', { colorScheme: scheme });
-    const pairs = await page.evaluate(() => ['.hm-caption', '.ov-section-lead', '.hm-key', '.hm-io', '.hm-io-label', '.hm-specs dd', '.hm-hint', '.hm-fine'].map(sel => {
+    const pairs = await page.evaluate(() => ['.hm-caption', '.hm-specs dd', '.hm-hint', '.hm-fine'].map(sel => {
       const el = document.querySelector(sel);
       let bg = 'rgba(0, 0, 0, 0)';
       for (let e = el; e && /rgba\(.*, 0\)$/.test(bg); e = e.parentElement) bg = getComputedStyle(e).backgroundColor;

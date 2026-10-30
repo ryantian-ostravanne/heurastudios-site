@@ -19,7 +19,7 @@ async function open(path, options = {}) {
 }
 
 test('no prices on the public pages: the plans are in Heura Studios, after logging in', async () => {
-  for (const path of ['/', '/privacy/', '/terms/', '/waitlist/']) {
+  for (const path of ['/', '/tools/', '/privacy/', '/terms/', '/waitlist/']) {
     const { page, errors, close } = await open(path);
     assert.equal(await page.locator('#pricing, .ov-plans').count(), 0, path);
     assert.equal(await page.locator('a[href$="#pricing"]').count(), 0, path);
@@ -31,7 +31,7 @@ test('no prices on the public pages: the plans are in Heura Studios, after loggi
 
 // The header: the logo, the two sections (from 760px) and the button, at the right. No Log in (Ryan, Oct 19: not on the
 // public pages; it's beside the Request access form on the home page).
-for (const path of ['/', '/privacy/', '/terms/']) {
+for (const path of ['/', '/tools/', '/privacy/', '/terms/']) {
   test(`${path}: the header fits from 320px to 1280px, its one button Request access at the right`, async () => {
     for (const width of [320, 360, 375, 390, 414, 420, 479, 480, 520, 600, 759, 760, 834, 880, 960, 1024, 1280]) {
       const { page, close } = await open(path, { viewport: { width, height: 700 } });

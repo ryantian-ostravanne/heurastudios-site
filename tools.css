@@ -1,0 +1,77 @@
+/* The Tools page (/tools/): the Studio's tools in its three groups, each as a card: its schematic icon on a plain
+   hairline tile (the owner's on a dark one; a group's very light color is only its dot), what it takes and gives, and
+   its recording under that. Two cards to a row on a wide screen, one on a phone. */
+:root {
+  --owner: #1d1d1f; --owner-ink: #f5f5f7;
+  --dot-signal: #9cc2ea; --dot-train: #c4b4e5; --dot-release: #d6b98a;
+}
+:root[data-theme="dark"] {
+  --owner: #f5f5f7; --owner-ink: #1d1d1f;
+  --dot-signal: #5f86b3; --dot-train: #8574b0; --dot-release: #a8895a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --owner: #f5f5f7; --owner-ink: #1d1d1f;
+    --dot-signal: #5f86b3; --dot-train: #8574b0; --dot-release: #a8895a;
+  }
+}
+
+.tl-main { padding: clamp(48px, 8vw, 112px) 0 clamp(88px, 10vw, 144px); }
+.tl-intro .ov-lead { margin-top: 20px; }
+/* the owner's tools: the dark tile says it, and the key names it once ("Owner only" is read out on each, for screen
+   readers) */
+.hm-key { display: flex; align-items: center; gap: 8px; margin-top: 20px; font-size: 13px; line-height: 1.4; color: var(--ink-2); }
+.hm-key-tile { flex: none; width: 14px; height: 14px; border-radius: 4px; background: var(--owner); }
+.hm-owner {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%);
+  white-space: nowrap; border: 0;
+}
+
+.tl-group { margin-top: clamp(56px, 7vw, 96px); }
+.tl-group-name {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+  font-family: var(--serif); font-size: clamp(26px, .8vw + 21px, 32px); font-weight: 400; line-height: 1.15; letter-spacing: -.01em;
+}
+.hm-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; }
+.cat-signal .hm-dot { background: var(--dot-signal); }
+.cat-train .hm-dot { background: var(--dot-train); }
+.cat-release .hm-dot { background: var(--dot-release); }
+
+.tl-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(16px, 2vw, 28px); }
+@media (max-width: 899px) { .tl-list { grid-template-columns: minmax(0, 1fr); } }
+.tl-tool {
+  display: grid; grid-template-rows: auto 1fr auto; padding: clamp(18px, 2.2vw, 28px);
+  border: 1px solid var(--edge); border-radius: clamp(16px, 1.8vw, 24px); background: var(--panel);
+  scroll-margin-top: calc(var(--header) + 24px);   /* (a link to #grounding lands under the header) */
+}
+.tl-name { display: flex; align-items: center; gap: 12px; font-size: 19px; font-weight: 700; line-height: 1.3; letter-spacing: -.005em; }
+.hm-tile {
+  display: inline-flex; flex: none; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 7px;
+  border: 1px solid var(--rule); background: var(--page); color: var(--ink);
+}
+.hm-tile svg { display: block; }
+.tl-tool.is-owner .hm-tile { border-color: var(--owner); background: var(--owner); color: var(--owner-ink); }
+.tl-io { display: grid; gap: 6px; margin-top: 16px; }
+.tl-io > div { display: grid; grid-template-columns: 4.2em minmax(0, 1fr); column-gap: 8px; }
+.tl-io dt { padding-top: 2px; font-size: 13px; font-weight: 700; line-height: 1.5; color: var(--ink-2); }
+.tl-io dd { font-size: 15px; line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
+
+/* its recording: the Studio at 640 x 480, in a thin frame; its first frame for the appearance in use is the frame's
+   background until the video has one of its own (--poster, --poster-dark: set on each) */
+.tl-film { display: grid; grid-template-columns: minmax(0, 1fr) auto; margin-top: 20px; }
+.tl-frame {
+  grid-column: 1 / -1; position: relative; overflow: hidden; aspect-ratio: 640 / 480;
+  border-radius: clamp(8px, 1vw, 12px); box-shadow: 0 0 0 1px var(--ring);
+  background: var(--page) var(--poster) center / cover no-repeat;
+}
+:root[data-theme="dark"] .tl-frame { background-image: var(--poster-dark); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme]) .tl-frame { background-image: var(--poster-dark); } }
+.tl-video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tl-toggle {
+  grid-row: 2; grid-column: 2; margin-top: 12px;
+  display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px;
+  border: 0; border-radius: 999px; background: var(--page); color: var(--ink); box-shadow: inset 0 0 0 1px var(--rule);
+  font: inherit; font-size: 14px; line-height: 1; cursor: pointer;
+}
+.tl-toggle:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.tl-toggle[hidden] { display: none; }

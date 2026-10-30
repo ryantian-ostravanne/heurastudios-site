@@ -1,8 +1,9 @@
 // The margins and the pipeline's wires (Ryan, Oct 29, 2026):
 // - "make the website background the canvas thingy ... but only have it on the border/right and left sides": the
 //   Studio's canvas (its grey and its dot grid) fills the page's margins, left and right of the column, on every page
-//   and in both appearances, from under the header down to the footer, and only where a screen leaves room beside the
-//   column: not on a phone, not on a 1280px laptop. Nothing of it is ever behind the column's words.
+//   and in both appearances, from the top of the screen ("can you also remove these two sides": the header's white
+//   beside the column) down to the footer, and only where a screen leaves room beside the column: not on a phone, not
+//   on a 1280px laptop. Nothing of it is ever behind the column's words.
 // - "make the canvas thing still and only have the center part scroll": it stays still while the page scrolls.
 // - "make the middle section stand out more": the column is a sheet on the canvas, the page's color with an edge.
 // - "for the privacy policy ... add like the pipeline lines as deco", then "make the terms like that too": each legal
@@ -13,7 +14,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { startServer, launch, readPng } = require('./helpers');
 
-const PAGES = ['/', '/waitlist/', '/privacy/', '/terms/'];
+const PAGES = ['/', '/tools/', '/waitlist/', '/privacy/', '/terms/'];
 const LEGAL = ['/privacy/', '/terms/'];
 const COLUMN = 1184;   // what .ov-wrap leaves for the words and panels on a wide screen: 1280px less 48px each side
 const SHEET = 1280;    // the sheet under the column: .ov-wrap's own width
@@ -129,14 +130,44 @@ test('a phone, or a laptop with no room beside the column, gets no canvas and no
   }
 });
 
-test('the header covers the canvas as the page scrolls under it, and so does the footer, with its own', async () => {
-  const width = 1600;
+// Ryan, 22:29 (the header's white over both margins circled): "can you also remove these two sides". Beside the
+// header the canvas runs on up to the top of the screen; the header covers only the column, as the sheet's top.
+test('beside the header the canvas runs to the top of the screen: the header is the sheet’s top, with its rule once the page scrolls; the footer has a canvas of its own', async () => {
+  const width = 1600, left = (width - SHEET) / 2, right = left + SHEET;
   for (const scheme of ['light', 'dark']) {
     const { page, close } = await bare('/', width, scheme);
+    const header = await page.locator('header.ov-top').boundingBox();
+    const rule = Math.round(header.y + header.height) - 1;   // the header's bottom row: its rule, once it scrolls
+    const clip = { x: 0, y: 0, width, height: rule + 1 };
+    const still = await band(page, clip);
     await page.evaluate(() => scrollTo(0, 700));
-    await page.waitForTimeout(100);
-    const top = await band(page, { x: 0, y: 0, width, height: 60 });   // the header, over the canvas
-    assert.equal(farthest(top, 0, 140, PAGE[scheme]), 0, `${scheme}: under the header`);
+    await page.waitForTimeout(400);   // (the rule fades in)
+    const top = await band(page, clip);
+    const at = `${scheme}`;
+    for (const shot of [still, top]) {
+      assert.ok(share(shot, 30, CANVAS[scheme]) > 0.8 && share(shot, width - 31, CANVAS[scheme]) > 0.8,
+        `${at}: the canvas beside the header`);
+      assert.ok(farthest(shot, 0, left - 20, PAGE[scheme]) > 30, `${at}: its dots too`);
+      assert.equal(share(shot, left - 1, EDGE[scheme]), 1, `${at}: the sheet's left edge, from the top of the screen`);
+      assert.equal(share(shot, right, EDGE[scheme]), 1, `${at}: and its right edge`);
+    }
+    // the canvas beside it stays still while the page scrolls under the header
+    let moved = 0;
+    for (let y = 0; y < still.height; y++) {
+      for (const x of [0, 40, 80, 120, width - 121, width - 81, width - 41, width - 1]) {
+        if (still.rgb(x, y).join() !== top.rgb(x, y).join()) moved++;
+      }
+    }
+    assert.equal(moved, 0, `${at}: the canvas beside the header doesn't move`);
+    // the header's part of the sheet: the page's color (beside the logo and Request access), and its rule only once
+    // the page has scrolled, only across the sheet
+    const inside = [left + 20, right - 21];
+    for (const x of inside) {
+      for (let y = 0; y < rule; y++) assert.equal(top.rgb(x, y).join(), `${PAGE[scheme]},${PAGE[scheme]},${PAGE[scheme]}`, `${at}: the sheet, (${x}, ${y})`);
+      assert.equal(still.rgb(x, rule).join(), `${PAGE[scheme]},${PAGE[scheme]},${PAGE[scheme]}`, `${at}: no rule before it scrolls`);
+      assert.equal(top.rgb(x, rule).join(), `${EDGE[scheme]},${EDGE[scheme]},${EDGE[scheme]}`, `${at}: the rule once it scrolls`);
+    }
+    assert.equal(top.rgb(30, rule).join(), still.rgb(30, rule).join(), `${at}: the rule stops at the sheet's edge`);
     await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
     await page.waitForTimeout(100);
     const row = await page.locator('.ov-foot-bottom').boundingBox();   // (the wires run higher up, by the nodes)
