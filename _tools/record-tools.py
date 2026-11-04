@@ -394,16 +394,17 @@ def serving(c, files):
     greet = panel.get_by_label("Greeting")
     c.click(greet, 0.85, 0.5)
     c.page.keyboard.press("Control+A")
-    c.type("Hi! Ask me about orders, returns or warranty.", 22)
+    c.type("Hi! Ask me about Fernbrook.", 22)   # the greeting is the wire's placeholder, so it has to fit on the line
     c.wait(700)
-    c.click(c.page.get_by_role("button", name="Open chat: Fernbrook Support"))
-    c.wait(1300)
-    box = c.page.locator("textarea, input[type=text]").last
+    widget = c.page.locator("[data-heura-widget]")   # the live preview in the page's corner (its shadow root is open)
+    c.click(widget.get_by_role("button", name="Ask Fernbrook Support"))
+    c.wait(1100)
+    box = widget.get_by_role("textbox", name="Ask Fernbrook Support")
     c.click(box, 0.3, 0.5)
     c.type("What amounts do gift cards come in?", 30)
     c.wait(300)
     c.page.keyboard.press("Enter")
-    c.page.get_by_text("never expire").last.wait_for(timeout=20000)   # its answer, in the bubble's chat
+    widget.get_by_text("never expire").last.wait_for(timeout=20000)   # its answer, above the wire
     c.wait(1800)
 
 
