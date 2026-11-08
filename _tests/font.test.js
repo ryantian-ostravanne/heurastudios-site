@@ -112,7 +112,7 @@ test('every word on every page is set in Cantarell, at 400 or 700', async () => 
 test('and on the blog as Jekyll builds it, a post’s italics included', async () => {
   const built = await startServer(buildSite());
   try {
-    for (const p of ['/blog/', '/blog/heura-eval-004/']) await checkWords(built.url, p);
+    for (const p of ['/blog/', '/blog/heura-eval-004/', '/blog/sleep-training/']) await checkWords(built.url, p);
     const words = await checkWords(built.url, '/blog/why-heura-studios-fits-small-business/');
     const italic = words.filter(w => w.what.startsWith('em '));
     assert.ok(italic.length >= 3 && italic.every(w => w.style === 'italic'), JSON.stringify(italic));
