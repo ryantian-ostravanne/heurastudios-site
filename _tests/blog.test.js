@@ -20,6 +20,12 @@ const SMB = '/blog/why-heura-studios-fits-small-business/';
 const SMB_TITLE = 'Your business, your computer, your assistant: why Heura Studios fits small business';
 const SMB_SUMMARY = 'Most AI assistants ask you to hand your documents and customer conversations to someone else’s ' +
   'servers. Heura Studios can run on your own computer, learns your business, and lets you check it before customers see it.';
+// the third post (Ryan, Nov 8, 2026: "write a blog about the new training tech"; his title): sleep training, Arche 0.30 to 0.32
+const SLEEP = '/blog/sleep-training/';
+const SLEEP_TITLE = 'Sleep training Arche';
+const SLEEP_SUMMARY = 'We adapted Google Research’s SLEEP framework to Heura Arche and taught it two new jobs. It learned ' +
+  'them better than a plain fine-tune, and its second run forgot less than its first. Not enough yet to ship.';
+const SLEEP_IMAGES = ['/img/blog/sleep-training-how-it-works.png', '/img/blog/sleep-training-jobs.png'];
 
 async function open(p, options = {}) {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 }, ...options });
@@ -37,14 +43,20 @@ test('the blog lists the posts, newest first, each with its date, summary and re
   assert.equal(await page.getByRole('heading', { level: 1 }).textContent(), 'Blog');
   assert.equal(await page.locator('.bl-lead').textContent(), 'Model reports and notes from the Heura Studios team.');
   const hrefs = await page.locator('.bl-list > li h2 a').evaluateAll(as => as.map(a => a.getAttribute('href')));
-  assert.deepEqual(hrefs, [SMB, POST]);
-  const first = page.locator('.bl-list > li').first();
+  assert.deepEqual(hrefs, [SLEEP, SMB, POST]);
+  const newest = page.locator('.bl-list > li').first();
+  assert.equal(await newest.locator('time').textContent(), 'November 8, 2026');
+  assert.equal(await newest.locator('time').getAttribute('datetime'), '2026-11-08');
+  assert.equal(await newest.getByRole('link', { name: SLEEP_TITLE }).getAttribute('href'), SLEEP);
+  assert.equal(await newest.locator('.bl-summary').textContent(), SLEEP_SUMMARY);
+  assert.equal(await newest.locator('.bl-report').count(), 0, 'no report to download');
+  const first = page.locator('.bl-list > li').nth(1);
   assert.equal(await first.locator('time').textContent(), 'October 15, 2026');
   assert.equal(await first.locator('time').getAttribute('datetime'), '2026-10-15');
   assert.equal(await first.getByRole('link', { name: SMB_TITLE }).getAttribute('href'), SMB);
   assert.equal(await first.locator('.bl-summary').textContent(), SMB_SUMMARY);
   assert.equal(await first.locator('.bl-report').count(), 0, 'a post without a report has no report link');
-  const second = page.locator('.bl-list > li').nth(1);
+  const second = page.locator('.bl-list > li').nth(2);
   assert.equal(await second.locator('time').textContent(), 'October 14, 2026');
   assert.equal(await second.locator('time').getAttribute('datetime'), '2026-10-14');
   const link = second.getByRole('link', { name: TITLE });
@@ -128,6 +140,59 @@ test('the small-business post: its title, byline, sections, the jobs, the footno
   await close();
 });
 
+test('the sleep training post: its title, byline, sections, pictures, scorecard, sources and what’s next', async () => {
+  const { page, errors, status, close } = await open(SLEEP);
+  assert.equal(status, 200);
+  assert.equal(await page.title(), `${SLEEP_TITLE} – Heura Studios`);
+  assert.equal(await page.getByRole('heading', { level: 1 }).textContent(), SLEEP_TITLE);
+  assert.equal(await page.locator('.bl-byline').innerText(), 'November 8, 2026, by Ryan');
+  assert.equal(await page.locator('.bl-download').count(), 0, 'no report to download');
+  assert.deepEqual(await page.locator('.bl-post h2').allTextContents(),
+    ['Background', 'Method', 'Results', 'Release status', 'Limitations', 'Next steps']);
+  assert.deepEqual(await page.locator('.bl-post ul > li > strong').evaluateAll(ss => ss.map(s => s.textContent)).then(a => a.slice(0, 3)),
+    ['Expansion.', 'Consolidation.', 'Dreaming.'], 'the method, in the paper’s words');
+  // the two pictures: each says what it shows, is served, and has loaded
+  const imgs = page.locator('.bl-post img');
+  assert.deepEqual(await imgs.evaluateAll(is => is.map(i => i.getAttribute('src'))), SLEEP_IMAGES);
+  for (const alt of await imgs.evaluateAll(is => is.map(i => i.getAttribute('alt')))) {
+    assert.ok(alt && alt.length > 40, 'every picture says what it shows');
+  }
+  await page.waitForFunction(() => [...document.querySelectorAll('.bl-post img')].every(i => i.complete && i.naturalWidth > 0));
+  for (const src of SLEEP_IMAGES) {
+    const res = await fetch(server.url + src);
+    assert.equal(res.status, 200, src);
+    assert.equal(res.headers.get('content-type'), 'image/png', src);
+  }
+  // the scorecard: the versions, the two jobs and what the live model keeps
+  const table = page.locator('.bl-post table').first();
+  assert.deepEqual(await table.locator('th').allTextContents(),
+    ['Measure', 'Arche 0.26 (live)', '0.30, plain', '0.31, sleep', '0.32, sleep']);
+  const row = async name => (await table.locator('tr', { hasText: name }).locator('td').allTextContents()).slice(1);
+  assert.deepEqual(await row('CASE-1'), ['9', '26', '35', '36']);
+  assert.deepEqual(await row('DATA-1'), ['2', '58', '70', '63']);
+  assert.deepEqual(await row('Business AI Benchmark v1'), ['91.7%', '90.4%', '88.3%', '88.3%']);
+  assert.deepEqual(await row('Lessons learned in the Studio'), ['39', '32', '33', '33']);
+  // the sources: the paper and Google Research's post
+  const post = page.locator('.bl-post');
+  assert.equal(await post.getByRole('link', { name: 'SLEEP framework' }).getAttribute('href'),
+    'https://research.google/blog/the-sleep-framework-a-new-way-for-llms-to-retain-knowledge-in-continual-learning/');
+  assert.equal(await post.getByRole('link', { name: 'Language Models Need Sleep: Learning to Self-Modify and Consolidate Memories' })
+    .getAttribute('href'), 'https://arxiv.org/abs/2606.03979');
+  const text = await post.innerText();
+  assert.match(text, /94 and 88 more benchmark items right than the live model, against 73 for the plain fine-tune/);
+  assert.match(text, /neither sleep version has shipped, and Arche 0\.26 is still the live model/);
+  assert.match(text, /a version that scores below the live one is held back/, 'the Promotion gate’s rule, as the home page says it');
+  assert.equal(await post.locator('ol > li').count(), 3, 'what’s next');
+  assert.equal(await page.getByRole('link', { name: 'All posts' }).getAttribute('href'), '/blog/');
+  const meta = async sel => page.locator(sel).getAttribute('content');
+  assert.equal(await meta('meta[name="description"]'), SLEEP_SUMMARY);
+  assert.equal(await meta('meta[property="og:type"]'), 'article');
+  assert.equal(await meta('meta[property="og:url"]'), 'https://heurastudios.com' + SLEEP);
+  assert.equal(await meta('meta[property="og:title"]'), SLEEP_TITLE);
+  assert.deepEqual(errors, []);
+  await close();
+});
+
 test('the report PDF is served as it is', async () => {
   const res = await fetch(server.url + PDF);
   assert.equal(res.status, 200);
@@ -138,7 +203,7 @@ test('the report PDF is served as it is', async () => {
 });
 
 test('every page links to the blog from its header and its footer', async () => {
-  for (const p of ['/', '/privacy/', '/terms/', '/waitlist/', '/blog/', POST, SMB]) {
+  for (const p of ['/', '/privacy/', '/terms/', '/waitlist/', '/blog/', POST, SMB, SLEEP]) {
     const { page, close } = await open(p);
     const header = await page.locator('header nav a').evaluateAll(as => as.map(a => [a.textContent.trim(), a.getAttribute('href')]));
     assert.deepEqual(header[header.length - 1], ['Blog', '/blog/'], `${p} header`);
@@ -156,7 +221,7 @@ test('every page links to the blog from its header and its footer', async () => 
 // small-business post's Launch an agent.
 const APP = 'https://app.heurastudios.com';
 test('the blog has Request access and no Log in, like every other page', async () => {
-  for (const p of ['/blog/', POST, SMB]) {
+  for (const p of ['/blog/', POST, SMB, SLEEP]) {
     const { page, errors, close } = await open(p);
     const asks = page.locator('header, footer').getByRole('link', { name: 'Request access' });
     assert.equal(await asks.count(), 2, `${p}: in the header and the footer`);
@@ -173,7 +238,7 @@ test('the blog has Request access and no Log in, like every other page', async (
 
 test('the blog fits a phone, in light and dark', async () => {
   for (const colorScheme of ['light', 'dark']) {
-    for (const p of ['/blog/', POST, SMB]) {
+    for (const p of ['/blog/', POST, SMB, SLEEP]) {
       const { page, close } = await open(p, { viewport: { width: 375, height: 800 }, colorScheme });
       const wide = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       assert.ok(wide <= 0, `${p} (${colorScheme}) scrolls sideways by ${wide}px`);
@@ -206,6 +271,7 @@ test('building the site copies every asset as it is (the pages are built from th
 test('the repo’s own files aren’t published', async () => {
   for (const p of ['/docs/superpowers/specs/2026-10-15-blog-design.md', '/README.md', '/README.html', '/_config.yml',
     '/_posts/2026-10-14-heura-eval-004.md', '/_posts/2026-10-15-why-heura-studios-fits-small-business.md',
+    '/_posts/2026-11-08-sleep-training.md',
     '/_layouts/post.html', '/_tests/helpers.js', '/_backend/core.js']) {
     assert.equal((await fetch(server.url + p)).status, 404, p);
   }
